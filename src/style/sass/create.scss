@@ -1,4 +1,4 @@
-.waitingRoom {
+.create {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,20 +8,6 @@
   max-height: 1024px;
   flex-shrink: 0;
   background-size: cover;
-
-  &::before {
-    content: '';
-    position: absolute;
-    width: 1440px;
-    height: 1024px;
-    background: linear-gradient(
-      180deg,
-      rgba(6, 0, 29, 0.8) 0%,
-      rgba(185, 93, 113, 0.8) 50%,
-      rgba(0, 9, 57, 0.8) 100%
-    );
-    background-blend-mode: darken;
-  }
 
   .background {
     width: 100%;
@@ -50,22 +36,6 @@
         font-style: normal;
         font-weight: 400;
         line-height: normal;
-      }
-
-      .iconBox {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        width: 90px;
-        height: 40px;
-        border-radius: 6px;
-        background: rgba(238, 238, 238, 0.5);
-
-        img {
-          width: 30px;
-          height: 30px;
-        }
       }
     }
 
@@ -139,15 +109,33 @@
             border-radius: 6px;
 
             .check {
-              gap: 220px;
+              gap: 130px;
               display: flex;
               flex-direction: row;
+              justify-content: center;
+              align-items: center;
+              margin-bottom: 36px;
+
+              p {
+                color: #666;
+                font-size: 18px;
+                font-weight: 600;
+                line-height: normal;
+                width: 100px;
+              }
+
+              .selectBox {
+                padding: 5px;
+                font-size: 25px;
+                width: 400px;
+                height: 50px;
+              }
             }
 
             button {
               color: #fff;
               text-align: center;
-              font-family: Inter;
+              margin-top: 200px;
               font-size: 30px;
               font-style: normal;
               font-weight: 500;
