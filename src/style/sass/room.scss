@@ -2,20 +2,25 @@
 
 .room {
   .roomArea {
+    display: grid;
+    grid-template-columns: 1fr 4.5fr 1.5fr;
+    gap: 20px;
     width: 100%;
     height: 100%;
     padding: 50px 30px;
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.2);
 
-    .roomTop {
-      display: grid;
-      grid-template-columns: 1fr 4.5fr 1.5fr;
-      gap: 20px;
+    .roomGroup {
+      display: flex;
+      flex-direction: column;
+
+      &:last-child {
+        align-items: flex-end;
+      }
 
       .logo {
         display: flex;
-        width: 200px;
         height: 80px;
         background: url('../images/logo.png') center / 100% 100% no-repeat;
         cursor: pointer;
@@ -24,123 +29,10 @@
         }
       }
 
-      .quizArea {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        height: 80px;
-        border-radius: 8px;
-        background-color: rgba(255, 255, 255, 0.5);
-
-        .timeArea {
-          padding: 6px 0 0 6px;
-
-          .time {
-            display: flex;
-            align-items: center;
-            font-size: 28px;
-            &::before {
-              content: '';
-              display: flex;
-              width: 30px;
-              height: 30px;
-              margin-top: -4px;
-              background: url('../images/icon/time.png') center / 30px 30px
-                no-repeat;
-            }
-          }
-        }
-
-        .answerArea {
-          display: flex;
-          align-items: center;
-
-          .answer {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 50px;
-            height: 50px;
-            font-size: 30px;
-            border-radius: 6px;
-            background-color: rgba(238, 238, 238, 0.6);
-            box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-
-            ~ .answer {
-              margin-left: 20px;
-            }
-          }
-        }
-
-        .btnArea {
-          padding: 6px 6px 0 0;
-
-          .btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 40px;
-            height: 24px;
-            border: 1px solid #dedede;
-            border-radius: 6px;
-            background-color: #ddd;
-          }
-        }
-      }
-
-      .settingArea {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        justify-self: flex-end;
-        width: 70px;
-        height: 40px;
-        padding: 4px 10px;
-        border-radius: 6px;
-        background-color: rgba(238, 238, 238, 0.5);
-
-        .btn {
-          display: flex;
-          width: 30px;
-          height: 30px;
-
-          &.lockOPen {
-            background: url('../images/icon/lock_open.png') center / 30px 30px
-              no-repeat;
-          }
-
-          &.lockClose {
-            background: url('../images/icon/lock_close.png') center / 30px 30px
-              no-repeat;
-          }
-
-          &.soundOpen {
-            background: url('../images/icon/sound_open.png') center / 30px 30px
-              no-repeat;
-          }
-
-          &.soundClose {
-            background: url('../images/icon/sound_close.png') center / 30px 30px
-              no-repeat;
-          }
-
-          span {
-            @include blind;
-          }
-        }
-      }
-    }
-
-    .roomBottom {
-      display: grid;
-      grid-template-columns: 1fr 4.5fr 1.5fr;
-      gap: 20px;
-      padding-top: 20px;
-
       .userArea {
         display: flex;
         flex-direction: column;
-        width: 200px;
+        margin-top: 20px;
 
         li {
           position: relative;
@@ -245,151 +137,258 @@
         }
       }
 
-      .sketchArea {
+      .quizArea {
         display: flex;
-        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        height: 80px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.5);
 
-        .canvasArea {
-          height: 100%;
-          border-radius: 6px;
-          background-color: #fff;
+        .timeArea {
+          padding: 6px 0 0 6px;
+
+          .time {
+            display: flex;
+            align-items: center;
+            font-size: 28px;
+            &::before {
+              content: '';
+              display: flex;
+              width: 30px;
+              height: 30px;
+              margin-top: -4px;
+              background: url('../images/icon/time.png') center / 30px 30px
+                no-repeat;
+            }
+          }
         }
 
-        .pencilArea {
+        .answerArea {
           display: flex;
-          justify-content: center;
           align-items: center;
-          height: 80px;
-          margin-top: 20px;
-          padding: 0 20px;
-          border-radius: 6px;
-          background-color: #fff;
 
-          .colorArea {
+          .answer {
             display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            font-size: 30px;
+            border-radius: 6px;
+            background-color: rgba(238, 238, 238, 0.6);
+            box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 
-            li {
-              ~ li {
-                margin-left: 10px;
-              }
+            ~ .answer {
+              margin-left: 20px;
+            }
+          }
+        }
 
-              $color_list: (
-                #f00,
-                #ff8c00,
-                #ff0,
-                #008000,
-                #00f,
-                #4b0082,
-                #800080,
-                #fff,
-                #000
-              );
+        .btnArea {
+          padding: 6px 6px 0 0;
 
-              @for $i from 1 to length($color_list) + 1 {
-                &:nth-child(#{$i}) {
-                  .formRadio {
-                    + .formLabel {
-                      background-color: nth($color_list, $i);
-                    }
-                  }
-                }
-              }
+          .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 24px;
+            border: 1px solid #dedede;
+            border-radius: 6px;
+            background-color: #ddd;
+          }
+        }
+      }
 
-              .formRadio {
-                display: none;
+      .canvasArea {
+        height: calc(100% - 200px);
+        margin-top: 20px;
+        border-radius: 6px;
+        background-color: #fff;
+      }
 
-                + .formLabel {
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  min-width: 46px;
-                  min-height: 46px;
-                  outline: 1px solid #ccc;
-                  border-radius: 6px;
-                  cursor: pointer;
+      .pencilArea {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80px;
+        margin-top: 20px;
+        padding: 0 20px;
+        border-radius: 6px;
+        background-color: #fff;
 
-                  span {
-                    @include blind;
-                  }
-                }
+        .colorArea {
+          display: flex;
 
-                &:checked {
+          li {
+            ~ li {
+              margin-left: 10px;
+            }
+
+            $color_list: (
+              #f00,
+              #ff8c00,
+              #ff0,
+              #008000,
+              #00f,
+              #4b0082,
+              #800080,
+              #fff,
+              #000
+            );
+
+            @for $i from 1 to length($color_list) + 1 {
+              &:nth-child(#{$i}) {
+                .formRadio {
                   + .formLabel {
-                    outline: 2px solid #000;
+                    background-color: nth($color_list, $i);
                   }
                 }
               }
             }
-          }
 
-          .drawArea {
-            display: flex;
-            align-items: center;
-            margin-left: 10px;
+            .formRadio {
+              display: none;
 
-            li {
-              ~ li {
-                margin-left: 10px;
-              }
-
-              $draw_list: (brush, eraser);
-
-              @for $i from 1 to length($draw_list) + 1 {
-                &:nth-child(#{$i}) {
-                  .formRadio {
-                    + .formLabel {
-                      background: url('../images/icon/#{nth($draw_list, $i)}.png')
-                        center /
-                        30px
-                        30px
-                        no-repeat;
-                    }
-                  }
-                }
-              }
-
-              .formRadio {
-                display: none;
-
-                + .formLabel {
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  min-width: 46px;
-                  min-height: 46px;
-                  outline: 1px solid #ccc;
-                  border-radius: 6px;
-                  cursor: pointer;
-
-                  span {
-                    @include blind;
-                  }
-                }
-
-                &:checked {
-                  + .formLabel {
-                    outline: 2px solid #000;
-                  }
-                }
-              }
-
-              .btn {
+              + .formLabel {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                width: 100px;
-                height: 46px;
-                font-size: 16px;
+                min-width: 46px;
+                min-height: 46px;
                 outline: 1px solid #ccc;
                 border-radius: 6px;
+                cursor: pointer;
 
-                &:active {
+                span {
+                  @include blind;
+                }
+              }
+
+              &:checked {
+                + .formLabel {
                   outline: 2px solid #000;
                 }
               }
             }
           }
         }
+
+        .drawArea {
+          display: flex;
+          align-items: center;
+          margin-left: 10px;
+
+          li {
+            ~ li {
+              margin-left: 10px;
+            }
+
+            $draw_list: (brush, eraser);
+
+            @for $i from 1 to length($draw_list) + 1 {
+              &:nth-child(#{$i}) {
+                .formRadio {
+                  + .formLabel {
+                    background: url('../images/icon/#{nth($draw_list, $i)}.png')
+                      center /
+                      30px
+                      30px
+                      no-repeat;
+                  }
+                }
+              }
+            }
+
+            .formRadio {
+              display: none;
+
+              + .formLabel {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-width: 46px;
+                min-height: 46px;
+                outline: 1px solid #ccc;
+                border-radius: 6px;
+                cursor: pointer;
+
+                span {
+                  @include blind;
+                }
+              }
+
+              &:checked {
+                + .formLabel {
+                  outline: 2px solid #000;
+                }
+              }
+            }
+
+            .btn {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              width: 100px;
+              height: 46px;
+              font-size: 16px;
+              outline: 1px solid #ccc;
+              border-radius: 6px;
+
+              &:active {
+                outline: 2px solid #000;
+              }
+            }
+          }
+        }
+      }
+
+      .settingArea {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        justify-self: flex-end;
+        width: 70px;
+        height: 40px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background-color: rgba(238, 238, 238, 0.5);
+
+        .btn {
+          display: flex;
+          width: 30px;
+          height: 30px;
+
+          &.lockOPen {
+            background: url('../images/icon/lock_open.png') center / 30px 30px
+              no-repeat;
+          }
+
+          &.lockClose {
+            background: url('../images/icon/lock_close.png') center / 30px 30px
+              no-repeat;
+          }
+
+          &.soundOpen {
+            background: url('../images/icon/sound_open.png') center / 30px 30px
+              no-repeat;
+          }
+
+          &.soundClose {
+            background: url('../images/icon/sound_close.png') center / 30px 30px
+              no-repeat;
+          }
+
+          span {
+            @include blind;
+          }
+        }
+      }
+
+      .chatArea {
+        margin-top: 50px;
+        height: calc(100% - 100px);
       }
     }
   }
