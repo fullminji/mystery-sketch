@@ -1,0 +1,32 @@
+
+.swiper-slide {
+  display:flex;
+  justify-content: center;
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  display: none;
+}
+
+.swiper-button-prev {
+  background: url('../images/icon/prevIcon.png') no-repeat;
+  background-size: 26px 44px;
+}
+
+.swiper-button-next {
+  background: url('../images/icon/nextIcon.png') no-repeat;
+  background-size: 26px 44px;
+}
+
+.swiper-slide img {
+  width: 120px;
+  height: 130px;
+}
+
+.swiper-slide {
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  width:100%;
+}
