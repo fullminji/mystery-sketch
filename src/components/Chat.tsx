@@ -12,7 +12,7 @@ const Chat: React.FC = () => {
   const [nickname] = useState<any>(() => {
     //로컬 스토리지에서 닉네임 가져올 예정 test로 기본이름값 지정
     const userNickname = localStorage.getItem('nickname');
-    return userNickname || '민지';
+    return userNickname || '햇살';
   });
 
   const [messages, setMessages] = useState<Message[]>([]);
