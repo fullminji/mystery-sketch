@@ -4,48 +4,10 @@
   justify-content: center;
   align-items: center;
 
-  .howToPlayArea {
-    line-height: 30px;
-    position: fixed;
-    top: 226px;
-    display: flex;
-    flex-direction: column;
-    width: 580px;
-    height: 580px;
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 10;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 20px;
-
-    .playContainer {
-      padding: 26px 70px;
-
-      h2 {
-        text-align: center;
-        font-size: 36px;
-        margin: 40px 0;
-      }
-
-      h3 {
-        text-align: center;
-        font-size: 26px;
-      }
-
-      .explanation {
-        margin: 56px 0;
-        li {
-          list-style: inside;
-        }
-        p{
-          text-align: center;
-          margin: 56px 0;
-        }
-      }
-    }
-  }
+  
 
   .selectContainer {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,6 +15,45 @@
     padding-bottom: 30px;
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.6);
+
+    .howToPlayArea {
+      z-index: 10;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      width: 580px;
+      border-radius: 8px;
+      font-size: 20px;
+      line-height: 30px;
+      color: #fff;
+      background-color: rgba(0, 0, 0, 0.8);
+  
+      .playContainer {
+        padding: 26px 70px;
+  
+        h2 {
+          text-align: center;
+          font-size: 36px;
+          margin: 40px 0;
+        }
+  
+        h3 {
+          text-align: center;
+          font-size: 26px;
+        }
+  
+        .explanation {
+          margin: 56px 0;
+          li {
+            list-style: inside;
+          }
+          p{
+            text-align: center;
+            margin: 56px 0;
+          }
+        }
+      }
+    }
 
     .questionArea {
       width: 100%;
