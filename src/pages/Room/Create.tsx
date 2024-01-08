@@ -16,7 +16,7 @@ const User: React.FC<UserProps> = ({ username, points }) => {
 
 const Create: React.FC = () => {
   return (
-    <div className="page waitingRoom">
+    <div className="page create">
       <div className="background">
         <div className="gameBar">
           <p className="logo">
@@ -24,7 +24,6 @@ const Create: React.FC = () => {
             <br />
             SKETCH
           </p>
-          <div className="iconBox" />
         </div>
         <div className="container">
           <div className="userBox">
@@ -43,11 +42,34 @@ const Create: React.FC = () => {
               <div className="canvas">
                 <div className="check">
                   <p>플레이어</p>
-                  <p>몇명</p>
+                  <select className="selectBox">
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                  </select>
                 </div>
-
+                <div className="check">
+                  <p>그리는 시간</p>
+                  <select className="selectBox">
+                    <option>60초</option>
+                    <option>80초</option>
+                    <option>100초</option>
+                  </select>
+                </div>
                 <div className="check">
                   <p>라운드</p>
+                  <select className="selectBox">
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                    <option>9</option>
+                    <option>10</option>
+                  </select>
                 </div>
                 <button>START</button>
               </div>
