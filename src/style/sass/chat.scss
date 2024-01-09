@@ -10,11 +10,18 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    height: 100%;
 
     .chatBox {
+      overflow-y: scroll;
+
+      ::-webkit-scrollbar {
+        display: none;
+      }
+
       p {
         padding: 10px;
-        height: 24px;
+        //height: 24px;
         font-size: 14px;
         font-style: normal;
         font-weight: 400;
