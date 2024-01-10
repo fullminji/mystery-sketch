@@ -10,6 +10,7 @@ type characterProps = {
 };
 
 const Main = () => {
+  const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [isToggled, setIsToggled] = useState<boolean>(false);
   const [character, setCharacter] = useState<characterProps[]>([]);
   const [name, setName] = useState<string>('');
@@ -19,7 +20,7 @@ const Main = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://43.203.93.116:8000/api/profileimage', {
+    fetch(`${api}/api/profileimage`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
@@ -52,7 +53,7 @@ const Main = () => {
   }, [selectRef]);
 
   const handleStart = () => {
-    fetch('http://43.203.93.116:8000/api/users/join', {
+    fetch(`${api}/api/users/join`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
