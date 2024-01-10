@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Canvas from './Canvas';
 import Chat from '../../components/Chat';
-import User from '../../components/User';
+import User, { UserInfo } from '../../components/User';
 
 const Room: React.FC = () => {
   const onReset = () => {
     // ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
+  const [room, setRoom] = useState<string>();
+  const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
+  const { roomId } = useParams<{ roomId: string }>();
+
+  useEffect(() => {
+    fetch(`http://43.203.93.116:8000/api/gameRoom/${roomId}`)
+      .then(res => res.json())
+      .then(result => {
+        setRoom(result.gameRoomInfo);
+        setUserInfo(result.gameRoomInfo.users);
+      });
+  }, [roomId]);
 
   return (
     <div className="page room">
@@ -15,7 +28,7 @@ const Room: React.FC = () => {
           <h1 className="logo">
             <a href="javascript">로고</a>
           </h1>
-          <User />
+          <User userInfo={userInfo} />
         </div>
         <div className="roomGroup">
           <div className="quizArea">

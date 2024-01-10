@@ -8,7 +8,7 @@ const Router = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Main />} />
-        <Route path="/room" element={<Room />} />
+        <Route path="/room/:roomId" element={<Room />} />
         <Route path="/create" element={<Create />} />
       </Routes>
     </BrowserRouter>
