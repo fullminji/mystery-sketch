@@ -2,20 +2,25 @@
 
 .room {
   .roomArea {
+    display: grid;
+    grid-template-columns: 1fr 4.5fr 1.5fr;
+    gap: 20px;
     width: 100%;
     height: 100%;
     padding: 50px 30px;
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.2);
 
-    .roomTop {
-      display: grid;
-      grid-template-columns: 1fr 4.5fr 1.5fr;
-      gap: 20px;
+    .roomGroup {
+      display: flex;
+      flex-direction: column;
+
+      &:last-child {
+        align-items: flex-end;
+      }
 
       .logo {
         display: flex;
-        width: 200px;
         height: 80px;
         background: url('../images/logo.png') center / 100% 100% no-repeat;
         cursor: pointer;
@@ -88,6 +93,149 @@
         }
       }
 
+      .canvasArea {
+        height: calc(100% - 200px);
+        margin-top: 20px;
+        border-radius: 6px;
+        background-color: #fff;
+      }
+
+      .pencilArea {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80px;
+        margin-top: 20px;
+        padding: 0 20px;
+        border-radius: 6px;
+        background-color: #fff;
+
+        .colorArea {
+          display: flex;
+
+          li {
+            ~ li {
+              margin-left: 10px;
+            }
+
+            $color_list: (
+              #f00,
+              #ff8c00,
+              #ff0,
+              #008000,
+              #00f,
+              #4b0082,
+              #800080,
+              #fff,
+              #000
+            );
+
+            @for $i from 1 to length($color_list) + 1 {
+              &:nth-child(#{$i}) {
+                .formRadio {
+                  + .formLabel {
+                    background-color: nth($color_list, $i);
+                  }
+                }
+              }
+            }
+
+            .formRadio {
+              display: none;
+
+              + .formLabel {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-width: 46px;
+                min-height: 46px;
+                outline: 1px solid #ccc;
+                border-radius: 6px;
+                cursor: pointer;
+
+                span {
+                  @include blind;
+                }
+              }
+
+              &:checked {
+                + .formLabel {
+                  outline: 2px solid #000;
+                }
+              }
+            }
+          }
+        }
+
+        .drawArea {
+          display: flex;
+          align-items: center;
+          margin-left: 10px;
+
+          li {
+            ~ li {
+              margin-left: 10px;
+            }
+
+            $draw_list: (brush, eraser);
+
+            @for $i from 1 to length($draw_list) + 1 {
+              &:nth-child(#{$i}) {
+                .formRadio {
+                  + .formLabel {
+                    background: url('../images/icon/#{nth($draw_list, $i)}.png')
+                      center /
+                      30px
+                      30px
+                      no-repeat;
+                  }
+                }
+              }
+            }
+
+            .formRadio {
+              display: none;
+
+              + .formLabel {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-width: 46px;
+                min-height: 46px;
+                outline: 1px solid #ccc;
+                border-radius: 6px;
+                cursor: pointer;
+
+                span {
+                  @include blind;
+                }
+              }
+
+              &:checked {
+                + .formLabel {
+                  outline: 2px solid #000;
+                }
+              }
+            }
+
+            .btn {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              width: 100px;
+              height: 46px;
+              font-size: 16px;
+              outline: 1px solid #ccc;
+              border-radius: 6px;
+
+              &:active {
+                outline: 2px solid #000;
+              }
+            }
+          }
+        }
+      }
+
       .settingArea {
         display: flex;
         justify-content: space-between;
@@ -129,275 +277,11 @@
           }
         }
       }
-    }
 
-    .roomBottom {
-      display: grid;
-      grid-template-columns: 1fr 4.5fr 1.5fr;
-      gap: 20px;
-      padding-top: 20px;
-
-      .userArea {
-        display: flex;
-        flex-direction: column;
-        width: 200px;
-
-        li {
-          position: relative;
-          display: flex;
-          align-items: center;
-          height: 70px;
-          border-radius: 6px;
-          background-color: #fff;
-
-          ~ li {
-            margin-top: 20px;
-          }
-
-          &.me {
-            outline: 3px solid #e08395;
-          }
-        }
-
-        .user {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-          padding: 4px 24px 0 10px;
-
-          &.no {
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            font-size: 20px;
-            color: #ddd;
-          }
-
-          .userInfo {
-            display: flex;
-            flex-direction: column;
-
-            .nickName {
-              &.me {
-                color: #e08395;
-              }
-            }
-
-            .point {
-              padding-top: 4px;
-            }
-          }
-
-          .char {
-            position: relative;
-            width: 40px;
-            height: 44px;
-            margin-top: -6px;
-
-            &.crown {
-              &::after {
-                content: '';
-                position: absolute;
-                top: -12px;
-                right: -8px;
-                width: 22px;
-                height: 22px;
-                background: url('../images/icon/crown.png') center / 22px 22px
-                  no-repeat;
-              }
-            }
-
-            &.pencil {
-              &::before {
-                content: '';
-                position: absolute;
-                top: -6px;
-                left: -6px;
-                width: 14px;
-                height: 14px;
-                background: url('../images/icon/pencil.png') center / 14px 14px
-                  no-repeat;
-              }
-            }
-
-            img {
-              width: 100%;
-            }
-          }
-        }
-        .btn {
-          position: absolute;
-          top: 0px;
-          right: 0px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 10px;
-          height: 10px;
-          padding: 4px;
-          background: url('../images/icon/close.png') center / 10px 10px
-            no-repeat;
-
-          span {
-            @include blind;
-          }
-        }
-      }
-
-      .sketchArea {
-        display: flex;
-        flex-direction: column;
-
-        .canvasArea {
-          height: 100%;
-          border-radius: 6px;
-          background-color: #fff;
-          .canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 6px;
-            canvas {
-              border: 1px solid red;
-            }
-          }
-        }
-
-        .pencilArea {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 80px;
-          margin-top: 20px;
-          padding: 0 20px;
-          border-radius: 6px;
-          background-color: #fff;
-
-          .colorArea {
-            display: flex;
-
-            li {
-              ~ li {
-                margin-left: 10px;
-              }
-
-              $color_list: (
-                #f00,
-                #ff8c00,
-                #ff0,
-                #008000,
-                #00f,
-                #4b0082,
-                #800080,
-                #fff,
-                #000
-              );
-
-              @for $i from 1 to length($color_list) + 1 {
-                &:nth-child(#{$i}) {
-                  .formRadio {
-                    + .formLabel {
-                      background-color: nth($color_list, $i);
-                    }
-                  }
-                }
-              }
-
-              .formRadio {
-                display: none;
-
-                + .formLabel {
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  min-width: 46px;
-                  min-height: 46px;
-                  outline: 1px solid #ccc;
-                  border-radius: 6px;
-                  cursor: pointer;
-
-                  span {
-                    @include blind;
-                  }
-                }
-
-                &:checked {
-                  + .formLabel {
-                    outline: 2px solid #000;
-                  }
-                }
-              }
-            }
-          }
-
-          .drawArea {
-            display: flex;
-            align-items: center;
-            margin-left: 10px;
-
-            li {
-              ~ li {
-                margin-left: 10px;
-              }
-
-              $draw_list: (brush, eraser);
-
-              @for $i from 1 to length($draw_list) + 1 {
-                &:nth-child(#{$i}) {
-                  .formRadio {
-                    + .formLabel {
-                      background: url('../images/icon/#{nth($draw_list, $i)}.png')
-                        center /
-                        30px
-                        30px
-                        no-repeat;
-                    }
-                  }
-                }
-              }
-
-              .formRadio {
-                display: none;
-
-                + .formLabel {
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  min-width: 46px;
-                  min-height: 46px;
-                  outline: 1px solid #ccc;
-                  border-radius: 6px;
-                  cursor: pointer;
-
-                  span {
-                    @include blind;
-                  }
-                }
-
-                &:checked {
-                  + .formLabel {
-                    outline: 2px solid #000;
-                  }
-                }
-              }
-
-              .btn {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 100px;
-                height: 46px;
-                font-size: 16px;
-                outline: 1px solid #ccc;
-                border-radius: 6px;
-
-                &:active {
-                  outline: 2px solid #000;
-                }
-              }
-            }
-          }
-        }
+      .chatArea {
+        width: 100%;
+        height: calc(100% - 100px);
+        margin-top: 50px;
       }
     }
   }
