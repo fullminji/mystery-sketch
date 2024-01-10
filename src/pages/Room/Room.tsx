@@ -5,6 +5,7 @@ import Chat from '../../components/Chat';
 import User, { UserInfo } from '../../components/User';
 
 const Room: React.FC = () => {
+  const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const onReset = () => {
     // ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
@@ -13,7 +14,7 @@ const Room: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
 
   useEffect(() => {
-    fetch(`http://172.30.1.17:8000/api/gameRoom/${roomId}`)
+    fetch(`${api}/api/gameRoom/${roomId}`)
       .then(res => res.json())
       .then(result => {
         setRoom(result.gameRoomInfo);

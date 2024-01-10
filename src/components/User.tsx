@@ -7,11 +7,6 @@ export interface UserInfo {
   users_id: number;
   image_link: string;
 }
-
-interface UserProps {
-  userInfo: UserInfo[];
-}
-
 interface UserProps {
   userInfo: UserInfo[];
 }
