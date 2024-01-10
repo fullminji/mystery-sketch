@@ -25,7 +25,7 @@ const Main = () => {
         <img src={logo} alt="미스터리 스케치" className="title" />
       </h1>
 
-      <div className="selectContainer" ref={selectRef}>
+      <div className="selectContainer">
         {isToggled && (
           <div className="howToPlayArea" onClick={() => setIsToggled(false)}>
             <div className="playContainer">
