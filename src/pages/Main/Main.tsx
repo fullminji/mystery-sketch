@@ -10,6 +10,7 @@ type characterProps = {
 };
 
 const Main = () => {
+  const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [isToggled, setIsToggled] = useState<boolean>(false);
   const [character, setCharacter] = useState<characterProps[]>([]);
   const [name, setName] = useState<string>('');
@@ -19,7 +20,7 @@ const Main = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://43.203.93.116:8000/api/profileimage', {
+    fetch(`${api}/api/profileimage`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
@@ -52,7 +53,16 @@ const Main = () => {
   }, [selectRef]);
 
   const handleStart = () => {
-    fetch('http://43.203.93.116:8000/api/users/join', {
+    const isValidName = /^[a-zA-Z0-9가-힣]{1,10}$/.test(name);
+
+    if (name.length === 0) {
+      return alert('이름을 입력해주세요.');
+    } else if (name.length > 10) {
+      return alert('10글자 이하로 입력해주세요.');
+    } else if (!isValidName) {
+      return alert('특수문자, 공백을 제외한 닉네임을 입력해주세요.');
+    }
+    fetch(`${api}/api/users/join`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
@@ -74,6 +84,13 @@ const Main = () => {
       .catch(error => {
         console.error(error);
       });
+  };
+
+  const handleName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nickName = e.target.value;
+    if (nickName.length <= 10) {
+      setName(nickName);
+    }
   };
 
   const handleCreate = () => {
@@ -127,7 +144,7 @@ const Main = () => {
           placeholder="enter your name"
           className="userName"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={e => handleName(e)}
         />
         <div className="btnArea">
           <button className="startBtn" onClick={handleStart}>
