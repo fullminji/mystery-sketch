@@ -13,7 +13,9 @@
     height: 100%;
 
     .chatBox {
+      height: 650px;
       overflow-y: scroll;
+      border-radius: 6px;
 
       ::-webkit-scrollbar {
         display: none;
@@ -21,7 +23,6 @@
 
       p {
         padding: 10px;
-        //height: 24px;
         font-size: 14px;
         font-style: normal;
         font-weight: 400;
@@ -52,7 +53,7 @@
         padding-left: 10px;
 
         input {
-          color: #ddd;
+          color: black;
           font-size: 14px;
           font-style: normal;
           line-height: normal;
