@@ -1,23 +1,12 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React from 'react';
+import Canvas from './Canvas';
 import Chat from '../../components/Chat';
 import User from '../../components/User';
 
-const Room = () => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  const [canvasTag, setCanvasTag] = useState<HTMLCanvasElement | null>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas !== null) {
-      canvas.width = 500;
-      canvas.height = 500;
-    }
-
-    setCanvasTag(canvas);
-  }, []);
-
-  console.log('canvas ', canvasTag);
+const Room: React.FC = () => {
+  const onReset = () => {
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
 
   return (
     <div className="page room">
@@ -46,7 +35,7 @@ const Room = () => {
             </div>
           </div>
           <div className="canvasArea">
-            <canvas ref={canvasRef}>dfa</canvas>
+            <Canvas />
           </div>
           <div className="pencilArea">
             <ul className="colorArea">
