@@ -10,7 +10,7 @@ type Message = {
 const Chat: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [message, setMessage] = useState<string>('');
-  const [nickname, setNickname] = useState<any>('햇살');
+  const [nickname, setNickname] = useState<any>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<any>(null);
 
