@@ -13,7 +13,7 @@ const Room: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
 
   useEffect(() => {
-    fetch(`http://43.203.93.116:8000/api/gameRoom/${roomId}`)
+    fetch(`http://172.30.1.17:8000/api/gameRoom/${roomId}`)
       .then(res => res.json())
       .then(result => {
         setRoom(result.gameRoomInfo);
@@ -47,138 +47,8 @@ const Room: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="canvasArea">
+          <div className="changeArea">
             <Canvas />
-          </div>
-          <div className="pencilArea">
-            <ul className="colorArea">
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color01"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color01" className="formLabel">
-                  <span>빨강</span>
-                </label>
-              </li>
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color02"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color02" className="formLabel">
-                  <span>주황</span>
-                </label>
-              </li>
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color03"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color03" className="formLabel">
-                  <span>노랑</span>
-                </label>
-              </li>
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color04"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color04" className="formLabel">
-                  <span>초록</span>
-                </label>
-              </li>
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color05"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color05" className="formLabel">
-                  <span>파랑</span>
-                </label>
-              </li>
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color06"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color06" className="formLabel">
-                  <span>남색</span>
-                </label>
-              </li>
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color07"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color07" className="formLabel">
-                  <span>보라</span>
-                </label>
-              </li>
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color08"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color08" className="formLabel">
-                  <span>흰색</span>
-                </label>
-              </li>
-              <li className="color">
-                <input
-                  type="radio"
-                  id="color09"
-                  name="colorGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="color09" className="formLabel">
-                  <span>검정</span>
-                </label>
-              </li>
-              <li className="draw">
-                <input
-                  type="radio"
-                  id="draw01"
-                  name="drawGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="draw01" className="formLabel">
-                  <span>연필</span>
-                </label>
-              </li>
-              <li className="draw">
-                <input
-                  type="radio"
-                  id="draw02"
-                  name="drawGroup"
-                  className="formRadio"
-                />
-                <label htmlFor="draw02" className="formLabel">
-                  <span>지우개</span>
-                </label>
-              </li>
-              <li className="draw">
-                <button type="button" className="btn">
-                  <span>전체 지우기</span>
-                </button>
-              </li>
-            </ul>
           </div>
         </div>
         <div className="roomGroup">
