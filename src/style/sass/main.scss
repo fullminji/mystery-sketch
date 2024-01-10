@@ -4,19 +4,56 @@
   justify-content: center;
   align-items: center;
 
-  .title {
-    font-size: 96px;
-    margin: 0;
-  }
+  
 
   .selectContainer {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 580px;
-    height: 580px;
+    padding-bottom: 30px;
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.6);
+
+    .howToPlayArea {
+      z-index: 10;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      width: 580px;
+      border-radius: 8px;
+      font-size: 20px;
+      line-height: 30px;
+      color: #fff;
+      background-color: rgba(0, 0, 0, 0.8);
+  
+      .playContainer {
+        padding: 26px 70px;
+  
+        h2 {
+          text-align: center;
+          font-size: 36px;
+          margin: 40px 0;
+        }
+  
+        h3 {
+          text-align: center;
+          font-size: 26px;
+        }
+  
+        .explanation {
+          margin: 56px 0;
+          li {
+            list-style: inside;
+          }
+          p{
+            text-align: center;
+            margin: 56px 0;
+          }
+        }
+      }
+    }
 
     .questionArea {
       width: 100%;
@@ -29,20 +66,27 @@
       }
     }
 
-    .characterArea {
+    .slideArea {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 258px;
-      height: 258px;
-      border-radius: 50%;
+      width: 256px;
+      height: 256px;
+      position: relative;
+    }
+
+    .characterBg {
+      position: absolute;
+      width: 256px;
+      height: 256px;
       background-color: #fff;
+      border-radius: 50%;
     }
 
     .userName {
       width: 258px;
       height: 42px;
-      margin: 40px;
+      margin: 30px;
       padding: 0 10px;
       border-radius: 8px;
       border: none;
@@ -58,10 +102,10 @@
         justify-content: center;
         align-items: center;
         width: 186px;
-        height: 70px;
+        height: 60px;
         margin-right: 5px;
         color: #fff;
-        font-size: 20px;
+        font-size: 32px;
         font-weight: 600;
         border-radius: 50px;
         border: 10px solid #fff;

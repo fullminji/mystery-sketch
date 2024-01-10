@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "userId": 1,
+      "nickname": "햇살",
+      "profileImage": "/src/style/images/visual/char.png",
+      "points": 0
+    },
+    {
+      "userId": 2,
+      "nickname": "민지주희지영",
+      "profileImage": "/src/style/images/visual/char.png",
+      "points": 0
+    },
+    {
+      "userId": 3,
+      "nickname": "민수진서준석",
+      "profileImage": "/src/style/images/visual/char.png",
+      "points": 0
+    },
+    {
+      "userId": 4,
+      "nickname": "새해복",
+      "profileImage": "/src/style/images/visual/char.png",
+      "points": 0
+    },
+    {
+      "userId": 5,
+      "nickname": "마니마니",
+      "profileImage": "/src/style/images/visual/char.png",
+      "points": 0
+    },
+    {
+      "userId": 6,
+      "nickname": "받으세용",
+      "profileImage": "/src/style/images/visual/char.png",
+      "points": 0
+    }
+  ]
+}

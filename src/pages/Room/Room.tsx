@@ -1,23 +1,12 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React from 'react';
+import Canvas from './Canvas';
 import Chat from '../../components/Chat';
-import char from '../../style/images/visual/char.png';
+import User from '../../components/User';
 
-const Room = () => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  const [canvasTag, setCanvasTag] = useState<HTMLCanvasElement | null>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas !== null) {
-      canvas.width = 500;
-      canvas.height = 500;
-    }
-
-    setCanvasTag(canvas);
-  }, []);
-
-  console.log('canvas ', canvasTag);
+const Room: React.FC = () => {
+  const onReset = () => {
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
 
   return (
     <div className="page room">
@@ -26,54 +15,7 @@ const Room = () => {
           <h1 className="logo">
             <a href="javascript">로고</a>
           </h1>
-          <ul className="userArea">
-            <li className="me">
-              <div className="user">
-                <div className="userInfo">
-                  <span className="nickName me">닉네임하세요&#40;YOU&#41;</span>
-                  <span className="point">1000 POINT</span>
-                </div>
-                <div className="char crown pencil">
-                  <img src={char} alt="캐릭터" />
-                </div>
-              </div>
-              <button type="button" className="btn close">
-                <span>추방</span>
-              </button>
-            </li>
-            <li>
-              <div className="user">
-                <div className="userInfo">
-                  <span className="nickName">닉네임하세요</span>
-                  <span className="point">100 POINT</span>
-                </div>
-                <div className="char">
-                  <img src={char} alt="캐릭터" />
-                </div>
-              </div>
-              <button type="button" className="btn close">
-                <span>추방</span>
-              </button>
-            </li>
-            <li>
-              <span className="user no">NO USER</span>
-            </li>
-            <li>
-              <span className="user no">NO USER</span>
-            </li>
-            <li>
-              <span className="user no">NO USER</span>
-            </li>
-            <li>
-              <span className="user no">NO USER</span>
-            </li>
-            <li>
-              <span className="user no">NO USER</span>
-            </li>
-            <li>
-              <span className="user no">NO USER</span>
-            </li>
-          </ul>
+          <User />
         </div>
         <div className="roomGroup">
           <div className="quizArea">
@@ -93,7 +35,7 @@ const Room = () => {
             </div>
           </div>
           <div className="canvasArea">
-            <canvas ref={canvasRef}>dfa</canvas>
+            <Canvas />
           </div>
           <div className="pencilArea">
             <ul className="colorArea">

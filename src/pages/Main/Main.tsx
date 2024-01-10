@@ -1,25 +1,141 @@
 import question from '../../style/images/icon/question.svg';
-import character from '../../style/images/visual/char.png';
 import logo from '../../style/images/logo.png';
+import Carousel from '../../components/Carousel';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+type characterProps = {
+  id: number;
+  image_link: string;
+};
 
 const Main = () => {
+  const [isToggled, setIsToggled] = useState<boolean>(false);
+  const [character, setCharacter] = useState<characterProps[]>([]);
+  const [name, setName] = useState<string>('');
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const selectRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('http://43.203.93.116:8000/api/profileimage', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setCharacter(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        selectRef.current &&
+        !selectRef.current.contains(event.target as Node)
+      ) {
+        setIsToggled(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [selectRef]);
+
+  const handleStart = () => {
+    fetch('http://43.203.93.116:8000/api/users/join', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify({
+        nickname: name,
+        profileImage: currentIndex + 1,
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        const roomId = data && data.roomId;
+        if (roomId) {
+          navigate(`/room/${roomId}`);
+        } else {
+          alert('오류가 발생했습니다. 다시 시도해주세요.');
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  const handleCreate = () => {
+    navigate('/create');
+  };
+
   return (
     <div className="page main">
       <h1>
-        <a href="javascript:;">미스터리 스케치</a>
         <img src={logo} alt="미스터리 스케치" className="title" />
       </h1>
-      <div className="selectContainer">
-        <div className="questionArea">
+
+      <div className="selectContainer" ref={selectRef}>
+        {isToggled && (
+          <div className="howToPlayArea" onClick={() => setIsToggled(false)}>
+            <div className="playContainer">
+              <h2>How to Play</h2>
+              <h3>MYSTERY SKETCH에 오신 걸 환영합니다!</h3>
+              <div className="explanation">
+                <ul>
+                  <li>
+                    각 라운드마다 플레이어들은 무작위로 할당된 단어를 그려 다른
+                    플레이어들이 추측할 수 있도록 합니다.
+                  </li>
+                  <li>
+                    플레이어는 채팅을 통해 정답을 맞추면 해당 라운드가 종료되며
+                    다음 라운드가 진행됩니다.
+                  </li>
+                </ul>
+                <p>
+                  가장 많은 점수를 얻어 1등에 도전하세요!
+                  <br />
+                  게임을 즐기면서 즐거운 시간 보내세요!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="questionArea" onClick={() => setIsToggled(true)}>
           <img src={question} alt="questionIcon" className="questionIcon" />
         </div>
-        <div className="characterArea">
-          <img src={character} alt="캐릭터이미지" />
+        <div className="slideArea">
+          <div className="characterBg" />
+          <Carousel
+            character={character}
+            setCurrentIndex={(index: number) => setCurrentIndex(index)}
+          />
         </div>
-        <input type="text" placeholder="enter your name" className="userName" />
+        <input
+          type="text"
+          placeholder="enter your name"
+          className="userName"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
         <div className="btnArea">
-          <button className="startBtn">START</button>
-          <button className="createBtn">CREATE</button>
+          <button className="startBtn" onClick={handleStart}>
+            START
+          </button>
+          <button className="createBtn" onClick={handleCreate}>
+            CREATE
+          </button>
         </div>
       </div>
     </div>
