@@ -39,7 +39,7 @@ const Room: React.FC = () => {
           </div>
           <div className="pencilArea">
             <ul className="colorArea">
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color01"
@@ -50,7 +50,7 @@ const Room: React.FC = () => {
                   <span>빨강</span>
                 </label>
               </li>
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color02"
@@ -61,7 +61,7 @@ const Room: React.FC = () => {
                   <span>주황</span>
                 </label>
               </li>
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color03"
@@ -72,7 +72,7 @@ const Room: React.FC = () => {
                   <span>노랑</span>
                 </label>
               </li>
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color04"
@@ -83,7 +83,7 @@ const Room: React.FC = () => {
                   <span>초록</span>
                 </label>
               </li>
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color05"
@@ -94,7 +94,7 @@ const Room: React.FC = () => {
                   <span>파랑</span>
                 </label>
               </li>
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color06"
@@ -105,7 +105,7 @@ const Room: React.FC = () => {
                   <span>남색</span>
                 </label>
               </li>
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color07"
@@ -116,7 +116,7 @@ const Room: React.FC = () => {
                   <span>보라</span>
                 </label>
               </li>
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color08"
@@ -127,7 +127,7 @@ const Room: React.FC = () => {
                   <span>흰색</span>
                 </label>
               </li>
-              <li>
+              <li className="color">
                 <input
                   type="radio"
                   id="color09"
@@ -138,9 +138,7 @@ const Room: React.FC = () => {
                   <span>검정</span>
                 </label>
               </li>
-            </ul>
-            <ul className="drawArea">
-              <li>
+              <li className="draw">
                 <input
                   type="radio"
                   id="draw01"
@@ -151,7 +149,7 @@ const Room: React.FC = () => {
                   <span>연필</span>
                 </label>
               </li>
-              <li>
+              <li className="draw">
                 <input
                   type="radio"
                   id="draw02"
@@ -162,7 +160,7 @@ const Room: React.FC = () => {
                   <span>지우개</span>
                 </label>
               </li>
-              <li>
+              <li className="draw">
                 <button type="button" className="btn">
                   <span>전체 지우기</span>
                 </button>
