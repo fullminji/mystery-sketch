@@ -8,53 +8,54 @@ type Message = {
 };
 
 const Chat: React.FC = () => {
+  const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [message, setMessage] = useState<string>('');
   const [nickname, setNickname] = useState<any>('햇살');
   const [messages, setMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<any>(null);
 
   //유저정보 불러올 get API fetch
-  const getUserInfo = useCallback(async () => {
-    try {
-      const response = await fetch('http://43.203.93.116:8000', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+  // const getUserInfo = useCallback(async () => {
+  //   try {
+  //     const response = await fetch(`${api}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       credentials: 'include',
+  //     });
 
-      if (response.ok) {
-        const userInfo = await response.json();
-        setNickname(userInfo.nickname);
-        // 입장 메시지를 보내는 코드 추가
-        if (socket) {
-          const enterMessage = `<p>${userInfo.nickname}님이 입장하셨습니다!</p>`;
-          socket.emit('message', {
-            message: enterMessage,
-            nickname: userInfo.nickname,
-          });
-        }
-      } else {
-        console.error('Failed to fetch user information');
-      }
-    } catch (error) {
-      console.error('Error fetching user information:', error);
-    }
-  }, [socket]);
+  //     if (response.ok) {
+  //       const userInfo = await response.json();
+  //       setNickname(userInfo.nickname);
+  //       // 입장 메시지를 보내는 코드 추가
+  //       if (socket) {
+  //         const enterMessage = `<p>${userInfo.nickname}님이 입장하셨습니다!</p>`;
+  //         socket.emit('message', {
+  //           message: enterMessage,
+  //           nickname: userInfo.nickname,
+  //         });
+  //       }
+  //     } else {
+  //       console.error('Failed to fetch user information');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching user information:', error);
+  //   }
+  // }, [socket]);
 
   //소켓 연결
   useEffect(() => {
-    const newSocket = io('http://43.203.93.116:8000');
+    const newSocket = io(`${api}`);
     setSocket(newSocket);
     return () => {
       newSocket.disconnect();
     };
   }, []);
 
-  useEffect(() => {
-    getUserInfo();
-  }, [getUserInfo]);
+  // useEffect(() => {
+  //   getUserInfo();
+  // }, [getUserInfo]);
 
   const sendMessage = useCallback(() => {
     if (socket && message.trim() !== '') {
