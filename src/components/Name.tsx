@@ -141,8 +141,13 @@ const Name = () => {
             </div>
           </div>
         )}
-        <div className="questionArea" onClick={() => setIsToggled(true)}>
-          <img src={question} alt="questionIcon" className="questionIcon" />
+        <div className="questionArea">
+          <img
+            src={question}
+            alt="questionIcon"
+            className="questionIcon"
+            onClick={() => setIsToggled(true)}
+          />
         </div>
         <div className="slideArea">
           <div className="characterBg" />
