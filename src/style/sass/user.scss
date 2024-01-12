@@ -55,8 +55,8 @@
 
       .char {
         position: relative;
-        width: 40px;
-        height: 44px;
+        width: 25px;
+        height: 25px;
         margin-top: -6px;
 
         &.crown {
@@ -65,8 +65,8 @@
             position: absolute;
             top: -12px;
             right: -8px;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             background: url('../images/icon/crown.png') center / 22px 22px
               no-repeat;
           }
@@ -100,7 +100,7 @@
       width: 10px;
       height: 10px;
       padding: 4px;
-      background: url('../images/icon/close.png') center / 10px 10px no-repeat;
+      background: url('../images/icon/close.png') center / 8px 8px no-repeat;
 
       span {
         @include blind;
