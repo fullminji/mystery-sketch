@@ -1,0 +1,108 @@
+.result {
+  * {
+    box-sizing: border-box;
+  }
+  .resultArea {
+    z-index: 1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    .resultGroup {
+      padding: 24px;
+      width: 450px;
+      background-color: white;
+
+      .closeArea {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+
+        img {
+          width: 24px;
+          height: 24px;
+          cursor: pointer;
+        }
+      }
+
+      .resultContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h2 {
+        margin: 10px;
+        font-size: 50px;
+      }
+
+      h3 {
+        margin: 10px;
+        font-size: 25px;
+      }
+
+      .rankResultGroup {
+        width: 100%;
+        text-align: left;
+
+        .rankResult {
+          li {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 25px;
+            font-size: 25px;
+
+            .rank {
+              margin-left: 55px;
+            }
+
+            .name {
+              display:inline-block;
+              width: 150px;
+              margin-left: 10px;
+            }
+
+            .point {
+              margin-left: 10px;
+
+              .pointLabel {
+                display:inline-block;
+                width:100px;
+              }
+            }
+          }
+          & li:first-child {
+            color: #fff;
+            background-color: #e08395;
+          }
+          & li:nth-child(2) {
+            color: #fff;
+            background-color: #425d88;
+          }
+          & li:nth-child(3) {
+            color: #fff;
+            background-color: #8b6687;
+          }
+        }
+      }
+      .checkBtn {
+        width: 100%;
+        height: 56px;
+        margin-top: 10px;
+        text-align: center;
+        font-size: 25px;
+        color: #fff;
+        border-radius: 25px;
+        background-color: #425d88;
+      }
+    }
+  }
+}
