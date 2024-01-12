@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 export interface UserInfo {
   score: number;
@@ -9,8 +9,28 @@ export interface UserInfo {
 }
 interface UserProps {
   userInfo: UserInfo[];
+  socket: any;
 }
-const User: React.FC<UserProps> = ({ userInfo }) => {
+const User: React.FC<UserProps> = ({ userInfo, socket }) => {
+  const name = sessionStorage.getItem('nickName');
+
+  useEffect(() => {
+    console.log('userInfo updated:', userInfo);
+  }, [userInfo, userInfo.length]);
+
+  //사용자 목록 업데이트
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+  //       console.log('User list updated:', updatedUserInfo);
+  //     });
+
+  //     return () => {
+  //       socket.off('userListUpdate');
+  //     };
+  //   }
+  // }, [socket]);
+
   return (
     <div className="user">
       <ul className="userArea">
@@ -21,12 +41,12 @@ const User: React.FC<UserProps> = ({ userInfo }) => {
             <li key={users_id}>
               <div className="users">
                 <div className="userInfo">
-                  <span className={`nickName ${isAdmin === 1 ? 'me' : ''}`}>
+                  <span className={`nickName ${name === username ? 'me' : ''}`}>
                     {username}
                   </span>
                   <span className="point">{score} POINT</span>
                 </div>
-                <div className="char crown pencil">
+                <div className={`char pencil ${isAdmin === 1 ? 'crown' : ''}`}>
                   <img src={image_link} alt="캐릭터" />
                 </div>
               </div>

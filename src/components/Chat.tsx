@@ -1,75 +1,22 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import io from 'socket.io-client';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { UserInfo } from '../components/User';
 import SendButton from '../style/images/icon/send_button.svg';
 
 type Message = {
   message: string;
-  nickname: any;
+  username: string;
 };
+interface UserProps {
+  userInfo: UserInfo[];
+  socket: any;
+}
 
-const Chat: React.FC = () => {
-  const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
+const Chat: React.FC<UserProps> = ({ userInfo, socket }) => {
+  //const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [message, setMessage] = useState<string>('');
-  const [nickname, setNickname] = useState<any>('');
+  const username = sessionStorage.getItem('nickName');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [socket, setSocket] = useState<any>(null);
-
-  //유저정보 불러올 get API fetch
-  // const getUserInfo = useCallback(async () => {
-  //   try {
-  //     const response = await fetch(`${api}`, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       credentials: 'include',
-  //     });
-
-  //     if (response.ok) {
-  //       const userInfo = await response.json();
-  //       setNickname(userInfo.nickname);
-  //       // 입장 메시지를 보내는 코드 추가
-  //       if (socket) {
-  //         const enterMessage = `<p>${userInfo.nickname}님이 입장하셨습니다!</p>`;
-  //         socket.emit('message', {
-  //           message: enterMessage,
-  //           nickname: userInfo.nickname,
-  //         });
-  //       }
-  //     } else {
-  //       console.error('Failed to fetch user information');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching user information:', error);
-  //   }
-  // }, [socket]);
-
-  //소켓 연결
-  useEffect(() => {
-    const newSocket = io(`${api}`);
-    setSocket(newSocket);
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
-
-  // useEffect(() => {
-  //   getUserInfo();
-  // }, [getUserInfo]);
-
-  const sendMessage = useCallback(() => {
-    if (socket && message.trim() !== '') {
-      const data = { message, nickname };
-      socket.emit('message', data);
-      setMessage('');
-    }
-  }, [socket, message, nickname]);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && message.trim() !== '') {
-      sendMessage();
-    }
-  };
+  const chatBoxRef = useRef<HTMLDivElement>(null);
 
   const messageHandler = useCallback((data: Message) => {
     setMessages(prevMessages => [...prevMessages, data]);
@@ -85,16 +32,38 @@ const Chat: React.FC = () => {
     }
   }, [socket, messageHandler]);
 
-  console.log(messages);
+  const sendMessage = useCallback(() => {
+    if (socket && message.trim() !== '') {
+      const data = { message, username };
+      socket.emit('message', data);
+      setMessage('');
+    }
+  }, [socket, message, username]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && message.trim() !== '') {
+      sendMessage();
+    }
+  };
+
+  //스크롤 감지
+  useEffect(() => {
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <div className="chat">
       <div className="chatContainer">
-        <div className="chatBox">
-          {messages.map((msg, index) => (
-            <p key={index}>
-              {msg.nickname}님 : {msg.message}
-            </p>
-          ))}
+        <div className="messages">
+          <div className="chatBox" ref={chatBoxRef}>
+            {messages.map((msg, index) => (
+              <p key={index}>
+                {msg.username}님 : {msg.message}
+              </p>
+            ))}
+          </div>
         </div>
         <div className="sendBox">
           <div className="send">

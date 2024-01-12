@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import io from 'socket.io-client';
 import Canvas from './Canvas';
 import Chat from '../../components/Chat';
 import User, { UserInfo } from '../../components/User';
@@ -12,6 +13,7 @@ const Room: React.FC = () => {
   const [room, setRoom] = useState<string>();
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
   const { roomId } = useParams<{ roomId: string }>();
+  const [socket, setSocket] = useState<any>(null);
 
   useEffect(() => {
     fetch(`${api}/api/gameRoom/${roomId}`)
@@ -20,7 +22,30 @@ const Room: React.FC = () => {
         setRoom(result.gameRoomInfo);
         setUserInfo(result.gameRoomInfo.users);
       });
+
+    // 소켓 연결
+    const newSocket = io(`${api}`);
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
   }, [roomId]);
+
+  //사용자 목록 업데이트
+  useEffect(() => {
+    if (socket) {
+      socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+        // 새로운 배열을 생성하여 React의 조화를 트리거
+        setUserInfo([...updatedUserInfo]);
+        console.log('User list updated성공이닭:', updatedUserInfo);
+      });
+
+      return () => {
+        socket.off('userListUpdate');
+      };
+    }
+  }, [socket]);
 
   return (
     <div className="page room">
@@ -29,7 +54,7 @@ const Room: React.FC = () => {
           <h1 className="logo">
             <a href="javascript">로고</a>
           </h1>
-          <User userInfo={userInfo} />
+          <User userInfo={userInfo} socket={socket} />
         </div>
         <div className="roomGroup">
           <div className="quizArea">
@@ -64,7 +89,7 @@ const Room: React.FC = () => {
             </button>
           </div>
           <div className="chatArea">
-            <Chat />
+            <Chat socket={socket} userInfo={userInfo} />
           </div>
         </div>
       </div>
