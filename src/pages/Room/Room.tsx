@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
-import Canvas from './Canvas';
+import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
 import User, { UserInfo } from '../../components/User';
 
 const Room: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
-  const onReset = () => {
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
   const [room, setRoom] = useState<string>();
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
   const { roomId } = useParams<{ roomId: string }>();
