@@ -54,7 +54,13 @@ const Room: React.FC = () => {
           <h1 className="logo">
             <a href="javascript">로고</a>
           </h1>
-          <User userInfo={userInfo} socket={socket} />
+          <User
+            userInfo={userInfo}
+            socket={socket}
+            setUserInfo={
+              setUserInfo as React.Dispatch<React.SetStateAction<UserInfo[]>>
+            }
+          />
         </div>
         <div className="roomGroup">
           <div className="quizArea">
