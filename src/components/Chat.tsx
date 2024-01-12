@@ -46,9 +46,26 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket }) => {
     }
   }, [socket, message, username]);
 
+  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter' && message.trim() !== '') {
+  //     sendMessage();
+  //   }
+  // };
+
+  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     e.preventDefault();
+  //     if (message.trim() !== '') {
+  //       sendMessage();
+  //     }
+  //   }
+  // };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && message.trim() !== '') {
-      sendMessage();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (message.trim() !== '') {
+        sendMessage();
+      }
     }
   };
 

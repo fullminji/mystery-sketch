@@ -13,36 +13,71 @@ const Room: React.FC = () => {
   const [socket, setSocket] = useState<any>(null);
 
   useEffect(() => {
-    fetch(`${api}/api/gameRoom/${roomId}`)
-      .then(res => res.json())
-      .then(result => {
-        setRoom(result.gameRoomInfo);
-        setUserInfo(result.gameRoomInfo.users);
-      });
+    getUser();
 
     // 소켓 연결
     const newSocket = io(`${api}`);
     setSocket(newSocket);
+    console.log('소켓연결');
 
     return () => {
       newSocket.disconnect();
     };
   }, [roomId]);
 
+  // const getUser = () => {
+  //   fetch(`${api}/api/gameRoom/${roomId}`)
+  //     .then(res => {
+  //       if (!res.ok) {
+  //         throw new Error(`HTTP error! Status: ${res.status}`);
+  //       }
+  //       return res.json();
+  //     })
+  //     .then(result => {
+  //       setRoom(result.gameRoomInfo);
+  //       setUserInfo(result.gameRoomInfo.users);
+  //     })
+  //     .catch(error => {
+  //       console.error('Fetch error:', error);
+  //     });
+  // };
+
+  const getUser = async () => {
+    try {
+      const response = await fetch(`${api}/api/gameRoom/${roomId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      setUserInfo(result.gameRoomInfo.users);
+    } catch (error) {
+      console.error('Fetch error:', error);
+    }
+  };
+
   //사용자 목록 업데이트
   useEffect(() => {
     if (socket) {
+      socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
       socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-        // 새로운 배열을 생성하여 React의 조화를 트리거
-        setUserInfo([...updatedUserInfo]);
+        setUserInfo(updatedUserInfo);
         console.log('User list updated성공이닭:', updatedUserInfo);
+        getUser();
       });
+
+      // socket.on('userListUpdate', (updatedUserInfoString: string) => {
+      //   const updatedUserInfo = JSON.parse(updatedUserInfoString);
+      //   const usersInfo = JSON.parse(updatedUserInfo.users);
+      //   setUserInfo(usersInfo);
+      //   console.log('User list updated성공이닭:', usersInfo);
+      //   getUser();
+      // });
 
       return () => {
         socket.off('userListUpdate');
       };
     }
-  }, [socket]);
+  }, [socket, roomId]);
 
   return (
     <div className="page room">

@@ -19,6 +19,24 @@ const User: React.FC<UserProps> = ({ userInfo, socket, setUserInfo }) => {
     console.log('userInfo updated:', userInfo);
   }, [userInfo, userInfo.length]);
 
+  //사용자 목록 업데이트
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+  //       // 새로운 배열을 생성하여 React의 조화를 트리거
+  //       setUserInfo(prevUserInfo => {
+  //         // 이전 상태를 사용하여 업데이트
+  //         return [...prevUserInfo, ...updatedUserInfo];
+  //       });
+  //       console.log('User list updated성공이닭:', updatedUserInfo);
+  //     });
+
+  //     return () => {
+  //       socket.off('userListUpdate');
+  //     };
+  //   }
+  // }, [socket]);
+
   // 클라이언트 측에서 유저를 추방하는 로직 추가
   const handleExpelUser = (userId: number, username: string) => {
     const updatedUsers = userInfo.filter(user => user.users_id !== userId);
@@ -35,21 +53,21 @@ const User: React.FC<UserProps> = ({ userInfo, socket, setUserInfo }) => {
     socket.emit('expelUser', { userId, username });
   };
 
-  useEffect(() => {
-    // 다른 클라이언트로부터 추방 정보 받기
-    socket.on(
-      'userExpelled',
-      ({ userId, username }: { userId: number; username: string }) => {
-        // 화면에서 해당 유저 제거
-        const updatedUsers = userInfo.filter(user => user.users_id !== userId);
-        setUserInfo(updatedUsers);
-      },
-    );
+  // useEffect(() => {
+  //   // 다른 클라이언트로부터 추방 정보 받기
+  //   socket.on(
+  //     'userExpelled',
+  //     ({ userId, username }: { userId: number; username: string }) => {
+  //       // 화면에서 해당 유저 제거
+  //       const updatedUsers = userInfo.filter(user => user.users_id !== userId);
+  //       setUserInfo(updatedUsers);
+  //     },
+  //   );
 
-    return () => {
-      socket.off('userExpelled');
-    };
-  }, [socket, userInfo]);
+  //   return () => {
+  //     socket.off('userExpelled');
+  //   };
+  // }, [socket, userInfo]);
 
   //사용자 목록 업데이트
   // useEffect(() => {
