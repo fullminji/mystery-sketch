@@ -89,10 +89,6 @@ const Create: React.FC = () => {
               </div>
               <button onClick={handleCreate}>START</button>
             </div>
-            <div className="linkCopyBtn">
-              <span>링크</span>
-              <span className="linkBtn">Copy</span>
-            </div>
           </div>
         </div>
       </div>
