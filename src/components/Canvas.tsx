@@ -1,10 +1,23 @@
 import React, { useRef, useState, useEffect } from 'react';
+import io from 'socket.io-client';
 
 const Canvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [painting, setPainting] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#000');
+
+  const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
+  const [socket, setSocket] = useState<any>(null);
+
+  useEffect(() => {
+    const newSocket = io(`${api}`);
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [api]);
 
   useEffect(() => {
     const pencilRadio = document.getElementById('draw1') as HTMLInputElement;
@@ -22,13 +35,28 @@ const Canvas: React.FC = () => {
       canvas.height = canvas.offsetHeight;
     }
 
-    const ctx = canvas?.getContext('2d');
-    if (ctx !== null && ctx !== undefined) {
-      ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = 3;
-      setCtx(ctx);
+    const context = canvas?.getContext('2d');
+    if (context) {
+      context.strokeStyle = selectedColor;
+      context.lineWidth = 3;
+      setCtx(context);
     }
-  }, []);
+
+    if (socket) {
+      socket.on('draw', (data: any) => {
+        ctx?.beginPath();
+        ctx?.moveTo(data.x, data.y);
+        ctx?.lineTo(data.x2, data.y2);
+        ctx?.stroke();
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('draw');
+      }
+    };
+  }, [socket, ctx]);
 
   // 컬러 변경
   const handleColorChange = (color: string) => {
@@ -40,46 +68,34 @@ const Canvas: React.FC = () => {
     | React.MouseEvent<HTMLCanvasElement, MouseEvent>
     | React.ChangeEvent<HTMLInputElement>;
   const drawFn = (e: DrawEvent) => {
-    if (e.type === 'mousemove') {
-      const canvas = canvasRef.current;
-      if (canvas !== null) {
-        const mouseEvent = e as React.MouseEvent<HTMLCanvasElement, MouseEvent>;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const mouseX = (mouseEvent.clientX - rect.left) * scaleX;
-        const mouseY = (mouseEvent.clientY - rect.top) * scaleY;
+    const canvas = canvasRef.current;
+    if (canvas && ctx) {
+      const mouseEvent = e as React.MouseEvent<HTMLCanvasElement, MouseEvent>;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (mouseEvent.clientX - rect.left) * scaleX;
+      const mouseY = (mouseEvent.clientY - rect.top) * scaleY;
 
-        if (!painting) {
-          if (ctx) {
-            ctx.beginPath();
-            ctx.moveTo(mouseX, mouseY);
-          }
-        } else {
-          if (ctx) {
-            ctx.lineTo(mouseX, mouseY);
-            ctx.strokeStyle = selectedColor;
-            ctx.stroke();
-          }
-        }
-      }
-    } else if (e.type === 'change') {
-      const canvas = canvasRef.current;
-      if (canvas && ctx) {
-        const mouseEvent = e as React.MouseEvent<HTMLCanvasElement, MouseEvent>;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const mouseX = (mouseEvent.clientX - rect.left) * scaleX;
-        const mouseY = (mouseEvent.clientY - rect.top) * scaleY;
-
-        if (ctx) {
+      if (e.type === 'mousemove') {
+        if (painting) {
           ctx.lineTo(mouseX, mouseY);
           ctx.strokeStyle = selectedColor;
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.lineWidth = 3;
           ctx.stroke();
+          socket.emit('draw', { x: mouseX, y: mouseY, x2: mouseX, y2: mouseY });
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(mouseX, mouseY);
         }
+      } else if (e.type === 'change') {
+        ctx.lineTo(mouseX, mouseY);
+        ctx.strokeStyle = selectedColor;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        socket.emit('draw', { x: mouseX, y: mouseY, x2: mouseX, y2: mouseY });
+      } else {
+        setPainting(false);
       }
     }
   };
@@ -87,19 +103,19 @@ const Canvas: React.FC = () => {
   // 지우개
   const eraseFn = () => {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (ctx && canvas) {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = 20;
+    const context = canvas?.getContext('2d');
+    if (context && canvas) {
+      context.globalCompositeOperation = 'destination-out';
+      context.lineWidth = 20;
     }
   };
 
   // 전체 지우기
   const clearCanvas = () => {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (ctx && canvas) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const context = canvas?.getContext('2d');
+    if (context && canvas) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
     }
     setPainting(false);
   };
