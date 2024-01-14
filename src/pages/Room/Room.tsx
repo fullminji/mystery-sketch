@@ -79,6 +79,18 @@ const Room: React.FC = () => {
     }
   }, [socket, roomId]);
 
+  // 잠금
+  const [isLocked, setIsLocked] = useState(false);
+  const toggleLock = () => {
+    setIsLocked(!isLocked);
+  };
+
+  //사운드
+  const [isSound, setIsSound] = useState(true);
+  const toggleSound = () => {
+    setIsSound(!isSound);
+  };
+
   return (
     <div className="page room">
       <div className="roomArea">
@@ -117,13 +129,19 @@ const Room: React.FC = () => {
         </div>
         <div className="roomGroup">
           <div className="settingArea">
-            <button type="button" className="btn lockOpen lockClose">
-              <span>잠금</span>
-              <span>열림</span>
+            <button
+              type="button"
+              className={`btn${isLocked ? ' lockOpen' : ' lockClose'}`}
+              onClick={toggleLock}
+            >
+              <span>{isLocked ? '열림' : '잠금'}</span>
             </button>
-            <button type="button" className="btn soundOPen soundClose">
-              <span>사운드 켜기</span>
-              <span>사운드 끄기</span>
+            <button
+              type="button"
+              className={`btn${isSound ? ' soundOpen' : ' soundClose'}`}
+              onClick={toggleSound}
+            >
+              <span>{isSound ? '사운드 켜기' : '사운드 끄기'}</span>
             </button>
           </div>
           <div className="chatArea">
