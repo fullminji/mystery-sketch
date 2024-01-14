@@ -13,7 +13,6 @@ interface UserProps {
 }
 
 const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
-  //const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [message, setMessage] = useState<string>('');
   const username = sessionStorage.getItem('nickName');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -46,12 +45,6 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
       setMessage('');
     }
   }, [socket, message, username]);
-
-  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (e.key === 'Enter' && message.trim() !== '') {
-  //     sendMessage();
-  //   }
-  // };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {

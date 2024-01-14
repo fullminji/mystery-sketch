@@ -7,9 +7,7 @@ import User, { UserInfo } from '../../components/User';
 
 const Room: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
-  const [room, setRoom] = useState<string>();
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
-  //const { roomId } = useParams<{ roomId: string }>();
   const { roomId } = useParams<{ roomId?: string }>() ?? { roomId: '' };
   const [socket, setSocket] = useState<any>(null);
 
@@ -29,13 +27,16 @@ const Room: React.FC = () => {
   useEffect(() => {
     getUser();
 
-    // 소켓 연결
-    //const newSocket = io(`${api}`);
+    //소켓 연결
     const newSocket = io(`${api}`, {
-      query: { roomId },
+      query: {
+        roomId,
+        users_id:
+          userInfo.length > 0 ? userInfo[userInfo.length - 1].users_id : null,
+      },
     });
     setSocket(newSocket);
-    console.log(roomId);
+    console.log('연결성공');
 
     return () => {
       newSocket.disconnect();
@@ -83,6 +84,7 @@ const Room: React.FC = () => {
             <a href="javascript">로고</a>
           </h1>
           <User
+            roomId={roomId!}
             userInfo={userInfo}
             socket={socket}
             setUserInfo={
