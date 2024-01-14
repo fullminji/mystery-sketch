@@ -6,6 +6,7 @@ export interface UserInfo {
   username: string;
   users_id: number;
   image_link: string;
+  roomId: string;
 }
 interface UserProps {
   userInfo: UserInfo[];
@@ -45,7 +46,7 @@ const User: React.FC<UserProps> = ({ userInfo, socket, setUserInfo }) => {
     // 시스템 메시지를 채팅박스에 추가
     socket.emit('message', {
       message: expulsionMessage,
-      username: '시스템',
+      username: '관리자',
       type: 'expel',
     });
 
