@@ -43,23 +43,6 @@ const Room: React.FC = () => {
     };
   }, [roomId]);
 
-  // const getUser = () => {
-  //   fetch(`${api}/api/gameRoom/${roomId}`)
-  //     .then(res => {
-  //       if (!res.ok) {
-  //         throw new Error(`HTTP error! Status: ${res.status}`);
-  //       }
-  //       return res.json();
-  //     })
-  //     .then(result => {
-  //       setRoom(result.gameRoomInfo);
-  //       setUserInfo(result.gameRoomInfo.users);
-  //     })
-  //     .catch(error => {
-  //       console.error('Fetch error:', error);
-  //     });
-  // };
-
   //사용자 목록 업데이트
   useEffect(() => {
     if (socket) {
