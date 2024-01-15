@@ -9,10 +9,10 @@ type Message = {
 interface UserProps {
   userInfo: UserInfo[];
   socket: any;
+  roomId: string;
 }
 
-const Chat: React.FC<UserProps> = ({ userInfo, socket }) => {
-  //const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
+const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
   const [message, setMessage] = useState<string>('');
   const username = sessionStorage.getItem('nickName');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -40,26 +40,12 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket }) => {
 
   const sendMessage = useCallback(() => {
     if (socket && message.trim() !== '') {
-      const data = { message, username };
+      const data = { message, username, roomId };
       socket.emit('message', data);
       setMessage('');
     }
   }, [socket, message, username]);
 
-  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (e.key === 'Enter' && message.trim() !== '') {
-  //     sendMessage();
-  //   }
-  // };
-
-  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (e.key === 'Enter') {
-  //     e.preventDefault();
-  //     if (message.trim() !== '') {
-  //       sendMessage();
-  //     }
-  //   }
-  // };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();

@@ -12,40 +12,9 @@ interface AnswerObject {
 
 const Room: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
-  const [room, setRoom] = useState<string>();
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
-  const { roomId } = useParams<{ roomId: string }>();
+  const { roomId } = useParams<{ roomId?: string }>() ?? { roomId: '' };
   const [socket, setSocket] = useState<any>(null);
-
-  useEffect(() => {
-    getUser();
-
-    // 소켓 연결
-    const newSocket = io(`${api}`);
-    setSocket(newSocket);
-    console.log('소켓연결');
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [roomId]);
-
-  // const getUser = () => {
-  //   fetch(`${api}/api/gameRoom/${roomId}`)
-  //     .then(res => {
-  //       if (!res.ok) {
-  //         throw new Error(`HTTP error! Status: ${res.status}`);
-  //       }
-  //       return res.json();
-  //     })
-  //     .then(result => {
-  //       setRoom(result.gameRoomInfo);
-  //       setUserInfo(result.gameRoomInfo.users);
-  //     })
-  //     .catch(error => {
-  //       console.error('Fetch error:', error);
-  //     });
-  // };
 
   const getUser = async () => {
     try {
@@ -60,6 +29,25 @@ const Room: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    getUser();
+
+    //소켓 연결
+    const newSocket = io(`${api}`, {
+      query: {
+        roomId,
+        users_id:
+          userInfo.length > 0 ? userInfo[userInfo.length - 1].users_id : null,
+      },
+    });
+    setSocket(newSocket);
+    console.log('연결성공');
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [roomId]);
+
   //사용자 목록 업데이트
   useEffect(() => {
     if (socket) {
@@ -69,14 +57,6 @@ const Room: React.FC = () => {
         console.log('User list updated성공이닭:', updatedUserInfo);
         getUser();
       });
-
-      // socket.on('userListUpdate', (updatedUserInfoString: string) => {
-      //   const updatedUserInfo = JSON.parse(updatedUserInfoString);
-      //   const usersInfo = JSON.parse(updatedUserInfo.users);
-      //   setUserInfo(usersInfo);
-      //   console.log('User list updated성공이닭:', usersInfo);
-      //   getUser();
-      // });
 
       return () => {
         socket.off('userListUpdate');
@@ -133,6 +113,7 @@ const Room: React.FC = () => {
             <a href="javascript">로고</a>
           </h1>
           <User
+            roomId={roomId!}
             userInfo={userInfo}
             socket={socket}
             setUserInfo={
@@ -194,7 +175,7 @@ const Room: React.FC = () => {
             </div>
           </div>
           <div className="chatArea">
-            <Chat socket={socket} userInfo={userInfo} />
+            <Chat socket={socket} userInfo={userInfo} roomId={roomId!} />
           </div>
         </div>
       </div>
