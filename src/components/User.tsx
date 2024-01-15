@@ -29,6 +29,7 @@ const User: React.FC<UserProps> = ({
   }, [userInfo, userInfo.length]);
 
   // 클라이언트 측에서 유저를 추방하는 로직 추가
+  const expelId: string | null = sessionStorage.getItem('users_id');
   const handleExpelUser = (users_id: number, username: string) => {
     const updatedUsers = userInfo.filter(user => user.users_id !== users_id);
     setUserInfo(updatedUsers);
@@ -43,15 +44,54 @@ const User: React.FC<UserProps> = ({
     // 서버에 추방 정보 전송
     socket.emit('expelUser', { users_id, roomId });
 
-    socket.on('userExpelled', (expelledUserId: number) => {
-      if (users_id === expelledUserId) {
+    socket.on('userExpel', (expelledUserId: number) => {
+      if (expelId && Number(expelId) === expelledUserId) {
         navigate('/');
         console.log('추방 성공');
       }
+      return () => {
+        socket.off('userExpel', expelledUserId);
+      };
     });
 
     console.log('추방유저 ID :', users_id, username);
   };
+
+  // const handleExpelUser = (users_id: number, username: string) => {
+  //   const updatedUsers = userInfo.filter(user => user.users_id !== users_id);
+  //   setUserInfo(updatedUsers);
+  //   const expulsionMessage = `${username}님이 추방되셨습니다.`;
+  //   // 시스템 메시지를 채팅박스에 추가
+  //   socket.emit('message', {
+  //     message: expulsionMessage,
+  //     username: '관리자',
+  //     type: 'expel',
+  //   });
+
+  //   // 서버에 추방 정보 전송
+  //   socket.emit('expelUser', { users_id, roomId });
+  // };
+
+  // useEffect(() => {
+  //   const expelId = sessionStorage.getItem('users_id');
+  //   if (socket && expelId) {
+  //     const handleUserExpelled = (expelledUserId: number) => {
+  //       if (Number(expelId) === expelledUserId) {
+  //         navigate('/');
+  //         alert('방장에 의해 추방되셨습니다.');
+  //         console.log('추방 성공');
+  //       }
+  //     };
+
+  //     // 컴포넌트가 마운트 될 때 이벤트 리스너 등록
+  //     socket.on('userExpel', handleUserExpelled);
+
+  //     // 컴포넌트가 언마운트 될 때 이벤트 리스너 해제
+  //     return () => {
+  //       socket.off('userExpel', handleUserExpelled);
+  //     };
+  //   }
+  // }, [socket]);
 
   // useEffect(() => {
   //   if (socket) {

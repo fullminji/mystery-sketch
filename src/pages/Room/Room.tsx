@@ -28,7 +28,12 @@ const Room: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const result = await response.json();
-      setUserInfo(result.gameRoomInfo.users);
+      const users = result.gameRoomInfo.users; // 수정된 부분
+      setUserInfo(users);
+      sessionStorage.setItem(
+        'users_id',
+        users[users.length - 1].users_id, // 수정된 부분
+      );
     } catch (error) {
       console.error('Fetch error:', error);
     }
