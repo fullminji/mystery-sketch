@@ -223,6 +223,7 @@
         flex-direction: column;
         align-items: flex-end;
         width: 100%;
+
         .btnArea {
           display: flex;
           justify-content: space-between;
@@ -238,7 +239,7 @@
             width: 30px;
             height: 30px;
 
-            &.lockOPen {
+            &.lockOpen {
               background: url('../images/icon/lock_open.png') center / 30px 30px
                 no-repeat;
             }
@@ -263,6 +264,7 @@
             }
           }
         }
+
         .copyArea {
           display: flex;
           justify-content: space-between;
