@@ -163,7 +163,7 @@ const Room: React.FC = () => {
             </div>
           </div>
           <div className="changeArea">
-            <Canvas />
+            <Canvas socket={socket} roomId={roomId!} />
           </div>
         </div>
         <div className="roomGroup">

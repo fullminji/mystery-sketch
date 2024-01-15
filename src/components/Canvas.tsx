@@ -1,23 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
-import io from 'socket.io-client';
 
-const Canvas: React.FC = () => {
+interface CanvasProps {
+  socket: any;
+  roomId: string;
+}
+
+const Canvas: React.FC<CanvasProps> = ({ socket }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [painting, setPainting] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#000');
-
-  const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
-  const [socket, setSocket] = useState<any>(null);
-
-  useEffect(() => {
-    const newSocket = io(`${api}`);
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [api]);
 
   useEffect(() => {
     const pencilRadio = document.getElementById('draw1') as HTMLInputElement;
@@ -44,10 +36,8 @@ const Canvas: React.FC = () => {
 
     if (socket) {
       socket.on('draw', (data: any) => {
-        ctx?.beginPath();
-        ctx?.moveTo(data.x, data.y);
-        ctx?.lineTo(data.x2, data.y2);
-        ctx?.stroke();
+        console.log('test', data);
+        drawOnCanvas(data);
       });
     }
 
@@ -61,6 +51,7 @@ const Canvas: React.FC = () => {
   // 컬러 변경
   const handleColorChange = (color: string) => {
     setSelectedColor(color);
+    socket.emit('color', { color });
   };
 
   // 그리기
@@ -79,21 +70,21 @@ const Canvas: React.FC = () => {
 
       if (e.type === 'mousemove') {
         if (painting) {
-          ctx.lineTo(mouseX, mouseY);
           ctx.strokeStyle = selectedColor;
+          ctx.lineTo(mouseX, mouseY);
           ctx.stroke();
-          socket.emit('draw', { x: mouseX, y: mouseY, x2: mouseX, y2: mouseY });
+          socket.emit('draw', { x: mouseX, y: mouseY });
         } else {
           ctx.beginPath();
           ctx.moveTo(mouseX, mouseY);
         }
       } else if (e.type === 'change') {
-        ctx.lineTo(mouseX, mouseY);
-        ctx.strokeStyle = selectedColor;
         ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = selectedColor;
         ctx.lineWidth = 3;
+        ctx.lineTo(mouseX, mouseY);
         ctx.stroke();
-        socket.emit('draw', { x: mouseX, y: mouseY, x2: mouseX, y2: mouseY });
+        socket.emit('draw', { x: mouseX, y: mouseY });
       } else {
         setPainting(false);
       }
@@ -118,6 +109,15 @@ const Canvas: React.FC = () => {
       context.clearRect(0, 0, canvas.width, canvas.height);
     }
     setPainting(false);
+  };
+
+  const drawOnCanvas = (data: any) => {
+    if (ctx) {
+      ctx.beginPath();
+      ctx.moveTo(data.x, data.y);
+      ctx.lineTo(data.x, data.y);
+      ctx.stroke();
+    }
   };
 
   return (
