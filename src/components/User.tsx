@@ -30,6 +30,7 @@ const User: React.FC<UserProps> = ({
 
   // 클라이언트 측에서 유저를 추방하는 로직 추가
   const handleExpelUser = (users_id: number, username: string) => {
+    const userExpel = userInfo.filter(user => user.users_id !== users_id);
     const updatedUsers = userInfo.filter(user => user.users_id !== users_id);
     setUserInfo(updatedUsers);
     const expulsionMessage = `${username}님이 추방되셨습니다.`;
@@ -40,29 +41,27 @@ const User: React.FC<UserProps> = ({
       type: 'expel',
     });
 
+    if (userExpel === updatedUsers) {
+      navigate('/');
+    }
     // 서버에 추방 정보 전송
     socket.emit('expelUser', { users_id, roomId });
+
     console.log('추방유저 ID :', users_id, username);
   };
 
-  useEffect(() => {
-    if (socket) {
-      socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-        setUserInfo(updatedUserInfo);
-        console.log(updatedUserInfo);
-      });
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+  //       setUserInfo(updatedUserInfo);
+  //       console.log(updatedUserInfo);
+  //     });
 
-      socket.emit('newUserJoined', (newUserInfo: UserInfo) => {
-        setUserInfo(prevUsers => [...prevUsers, newUserInfo]);
-        console.log(`${newUserInfo.username}님이 입장했습니다.`);
-      });
-
-      return () => {
-        socket.off('userListUpdate');
-        socket.off('newUserJoined');
-      };
-    }
-  }, [socket]);
+  //     return () => {
+  //       socket.off('userListUpdate');
+  //     };
+  //   }
+  // }, [socket]);
 
   return (
     <div className="user">
