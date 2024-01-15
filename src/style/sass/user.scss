@@ -97,14 +97,10 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       padding: 4px;
       background: url('../images/icon/close.png') center / 8px 8px no-repeat;
-
-      span {
-        @include blind;
-      }
     }
   }
 }

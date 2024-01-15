@@ -49,21 +49,21 @@ const Room: React.FC = () => {
     };
   }, [roomId]);
 
-  //사용자 목록 업데이트
-  useEffect(() => {
-    if (socket) {
-      socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
-      socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-        setUserInfo(updatedUserInfo);
-        console.log('User list updated성공이닭:', updatedUserInfo);
-        getUser();
-      });
+  // //사용자 목록 업데이트
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
+  //     socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+  //       setUserInfo(updatedUserInfo);
+  //       console.log('User list updated성공이닭:', updatedUserInfo);
+  //       getUser();
+  //     });
 
-      return () => {
-        socket.off('userListUpdate');
-      };
-    }
-  }, [socket, roomId]);
+  //     return () => {
+  //       socket.off('userListUpdate');
+  //     };
+  //   }
+  // }, [socket, roomId]);
 
   // 단어 불러오기
   const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
@@ -83,6 +83,8 @@ const Room: React.FC = () => {
       });
   }, []);
 
+  const answerValues = answerList.map(item => item.answer);
+
   // 잠금
   const [isLocked, setIsLocked] = useState(false);
   const toggleLock = () => {
@@ -99,6 +101,8 @@ const Room: React.FC = () => {
       alert('오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
+
+  console.log(answerList);
 
   return (
     <div className="page room">
@@ -121,15 +125,32 @@ const Room: React.FC = () => {
             <div className="timeArea">
               <span className="time">90</span>
             </div>
-            {answerList.map((answerObj, index) => (
+            {/* {answerValues.map((answer, index) => (
               <div className="answerArea" key={index}>
-                {answerObj.answer.split('').map((letter, letterIndex) => (
-                  <div className="answer" key={letterIndex}>
+                {answer.split('').map((letter, letterIndex) => (
+                  <div
+                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
+                    key={letterIndex}
+                  >
                     {letter}
                   </div>
                 ))}
               </div>
-            ))}
+            ))} */}
+
+            {answerValues[0] && (
+              <div className="answerArea">
+                {answerValues[0].split('').map((letter, letterIndex) => (
+                  <div
+                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
+                    key={letterIndex}
+                  >
+                    {letter}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="btnArea">
               <button type="button" className="btn">
                 포기
@@ -137,7 +158,7 @@ const Room: React.FC = () => {
             </div>
           </div>
           <div className="changeArea">
-            <Canvas />
+            <Canvas socket={socket} roomId={roomId!} />
           </div>
         </div>
         <div className="roomGroup">
