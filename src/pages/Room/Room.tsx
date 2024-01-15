@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
 import User, { UserInfo } from '../../components/User';
+import Sound from '../../components/Sound';
 
 interface AnswerObject {
   id: number;
@@ -15,6 +16,10 @@ const Room: React.FC = () => {
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
   const { roomId } = useParams<{ roomId?: string }>() ?? { roomId: '' };
   const [socket, setSocket] = useState<any>(null);
+  const navigate = useNavigate();
+
+  const nickName = sessionStorage.getItem('nickName');
+  const character = sessionStorage.getItem('character');
 
   const getUser = async () => {
     try {
@@ -30,6 +35,10 @@ const Room: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!nickName || !character) {
+      navigate(`/main/${roomId}`);
+      return () => {};
+    }
     getUser();
 
     //소켓 연결
@@ -48,21 +57,21 @@ const Room: React.FC = () => {
     };
   }, [roomId]);
 
-  //사용자 목록 업데이트
-  useEffect(() => {
-    if (socket) {
-      socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
-      socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-        setUserInfo(updatedUserInfo);
-        console.log('User list updated성공이닭:', updatedUserInfo);
-        getUser();
-      });
+  // //사용자 목록 업데이트
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
+  //     socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+  //       setUserInfo(updatedUserInfo);
+  //       console.log('User list updated성공이닭:', updatedUserInfo);
+  //       getUser();
+  //     });
 
-      return () => {
-        socket.off('userListUpdate');
-      };
-    }
-  }, [socket, roomId]);
+  //     return () => {
+  //       socket.off('userListUpdate');
+  //     };
+  //   }
+  // }, [socket, roomId]);
 
   // 단어 불러오기
   const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
@@ -82,27 +91,18 @@ const Room: React.FC = () => {
       });
   }, []);
 
+  const answerValues = answerList.map(item => item.answer);
+
   // 잠금
   const [isLocked, setIsLocked] = useState(false);
   const toggleLock = () => {
     setIsLocked(!isLocked);
   };
 
-  //사운드
-  const [isSound, setIsSound] = useState(true);
-  const toggleSound = () => {
-    setIsSound(!isSound);
-  };
-
   // copy
   const handleCopyToClipboard = () => {
-    const nickName = sessionStorage.getItem('nickName');
-
-    if (nickName === null) {
-      navigator.clipboard.writeText(`/main/${roomId}`);
-    } else {
-      alert('오류가 발생했습니다. 다시 시도해주세요.');
-    }
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => alert('복사완료'));
   };
 
   return (
@@ -126,15 +126,32 @@ const Room: React.FC = () => {
             <div className="timeArea">
               <span className="time">90</span>
             </div>
-            {answerList.map((answerObj, index) => (
+            {/* {answerValues.map((answer, index) => (
               <div className="answerArea" key={index}>
-                {answerObj.answer.split('').map((letter, letterIndex) => (
-                  <div className="answer" key={letterIndex}>
+                {answer.split('').map((letter, letterIndex) => (
+                  <div
+                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
+                    key={letterIndex}
+                  >
                     {letter}
                   </div>
                 ))}
               </div>
-            ))}
+            ))} */}
+
+            {answerValues[0] && (
+              <div className="answerArea">
+                {answerValues[0].split('').map((letter, letterIndex) => (
+                  <div
+                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
+                    key={letterIndex}
+                  >
+                    {letter}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="btnArea">
               <button type="button" className="btn">
                 포기
@@ -155,13 +172,7 @@ const Room: React.FC = () => {
               >
                 <span>{isLocked ? '열림' : '잠금'}</span>
               </button>
-              <button
-                type="button"
-                className={`btn${isSound ? ' soundOpen' : ' soundClose'}`}
-                onClick={toggleSound}
-              >
-                <span>{isSound ? '사운드 켜기' : '사운드 끄기'}</span>
-              </button>
+              <Sound />
             </div>
             <div className="copyArea">
               <span>링크</span>

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export interface UserInfo {
   score: number;
@@ -20,6 +21,7 @@ const User: React.FC<UserProps> = ({
   setUserInfo,
   roomId,
 }) => {
+  const navigate = useNavigate();
   const name = sessionStorage.getItem('nickName');
 
   useEffect(() => {
@@ -40,7 +42,7 @@ const User: React.FC<UserProps> = ({
 
     // 서버에 추방 정보 전송
     socket.emit('expelUser', { users_id, roomId });
-    console.log('추방유저 ID :', users_id);
+    console.log('추방유저 ID :', users_id, username);
   };
 
   useEffect(() => {
@@ -50,8 +52,14 @@ const User: React.FC<UserProps> = ({
         console.log(updatedUserInfo);
       });
 
+      socket.emit('newUserJoined', (newUserInfo: UserInfo) => {
+        setUserInfo(prevUsers => [...prevUsers, newUserInfo]);
+        console.log(`${newUserInfo.username}님이 입장했습니다.`);
+      });
+
       return () => {
         socket.off('userListUpdate');
+        socket.off('newUserJoined');
       };
     }
   }, [socket]);
@@ -75,13 +83,13 @@ const User: React.FC<UserProps> = ({
                   <img src={image_link} alt="캐릭터" />
                 </div>
               </div>
-              <button
-                className="btn close"
-                type="button"
-                onClick={() => handleExpelUser(users_id, username)}
-              >
-                <span>추방</span>
-              </button>
+              {isAdmin !== 1 && (
+                <button
+                  className={`${isAdmin !== 1 ? 'btn close' : ''}`}
+                  type="button"
+                  onClick={() => handleExpelUser(users_id, username)}
+                />
+              )}
             </li>
           );
         })}

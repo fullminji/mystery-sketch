@@ -2,7 +2,7 @@ import question from '../../style/images/icon/question.svg';
 import logo from '../../style/images/logo.png';
 import Carousel from '../../components/Carousel';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 type characterProps = {
   id: number;
@@ -16,6 +16,7 @@ const LinkMain = () => {
   const [name, setName] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const selectRef = useRef<HTMLDivElement>(null);
+  const { roomId } = useParams<{ roomId?: string }>();
 
   const navigate = useNavigate();
 
@@ -81,13 +82,9 @@ const LinkMain = () => {
     })
       .then(res => res.json())
       .then(data => {
-        const roomId = data && data.roomId;
-        if (roomId) {
-          sessionStorage.setItem('nickName', name);
-          navigate(`/room/${roomId}`);
-        } else {
-          alert('오류가 발생했습니다. 다시 시도해주세요.');
-        }
+        sessionStorage.setItem('nickName', name);
+        sessionStorage.setItem('character', (currentIndex + 1).toString());
+        navigate(`/room/${roomId}`);
       })
       .catch(error => {
         console.error(error);
