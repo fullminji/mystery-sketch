@@ -42,27 +42,29 @@ const User: React.FC<UserProps> = ({
 
     // 서버에 추방 정보 전송
     socket.emit('expelUser', { users_id, roomId });
+
+    socket.on('userExpelled', (expelledUserId: number) => {
+      if (users_id === expelledUserId) {
+        navigate('/');
+        console.log('추방 성공');
+      }
+    });
+
     console.log('추방유저 ID :', users_id, username);
   };
 
-  useEffect(() => {
-    if (socket) {
-      socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-        setUserInfo(updatedUserInfo);
-        console.log(updatedUserInfo);
-      });
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+  //       setUserInfo(updatedUserInfo);
+  //       console.log(updatedUserInfo);
+  //     });
 
-      socket.emit('newUserJoined', (newUserInfo: UserInfo) => {
-        setUserInfo(prevUsers => [...prevUsers, newUserInfo]);
-        console.log(`${newUserInfo.username}님이 입장했습니다.`);
-      });
-
-      return () => {
-        socket.off('userListUpdate');
-        socket.off('newUserJoined');
-      };
-    }
-  }, [socket]);
+  //     return () => {
+  //       socket.off('userListUpdate');
+  //     };
+  //   }
+  // }, [socket]);
 
   return (
     <div className="user">
