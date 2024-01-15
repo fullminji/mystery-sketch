@@ -1,8 +1,7 @@
 .btn {
   display: flex;
-  width: 30px;
-  height: 30px;
-  
+  padding: 0 4px;
+
   &.soundOpen {
     background: url('../images/icon/sound_open.png') center / 30px 30px
       no-repeat;

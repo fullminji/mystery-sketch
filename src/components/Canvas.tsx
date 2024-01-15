@@ -5,7 +5,7 @@ interface CanvasProps {
   roomId: string;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ socket }) => {
+const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [painting, setPainting] = useState(false);
@@ -36,7 +36,6 @@ const Canvas: React.FC<CanvasProps> = ({ socket }) => {
 
     if (socket) {
       socket.on('draw', (data: any) => {
-        console.log('test', data);
         drawOnCanvas(data);
       });
     }
@@ -92,7 +91,7 @@ const Canvas: React.FC<CanvasProps> = ({ socket }) => {
   };
 
   // 지우개
-  const eraseFn = () => {
+  const eraserFn = () => {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
     const context = canvas?.getContext('2d');
     if (context && canvas) {
@@ -112,11 +111,14 @@ const Canvas: React.FC<CanvasProps> = ({ socket }) => {
   };
 
   const drawOnCanvas = (data: any) => {
-    if (ctx) {
-      ctx.beginPath();
-      ctx.moveTo(data.x, data.y);
+    const canvas = canvasRef.current;
+    if (canvas && ctx) {
+      ctx.strokeStyle = data.color;
       ctx.lineTo(data.x, data.y);
       ctx.stroke();
+    } else {
+      ctx?.beginPath();
+      ctx?.moveTo(data.x, data.y);
     }
   };
 
@@ -162,7 +164,7 @@ const Canvas: React.FC<CanvasProps> = ({ socket }) => {
             id="draw2"
             name="drawGroup"
             className="formRadio"
-            onChange={eraseFn}
+            onChange={eraserFn}
           />
           <label htmlFor="draw2" className="formLabel">
             <span>지우개</span>
