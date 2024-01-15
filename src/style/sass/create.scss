@@ -12,35 +12,6 @@
       margin-bottom: 20px;
 
       .settingBox {
-        .linkCopyBtn {
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          background-color: #425d88;
-          border: none;
-          border-radius: 30px;
-          width: 800px;
-          height: 70px;
-          flex-shrink: 0;
-          margin-top: 30px;
-
-          span {
-            padding: 0px 30px;
-            align-self: center;
-            color: #fff;
-            font-family: Itim;
-            font-size: 25px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: normal;
-          }
-
-          .linkBtn {
-            text-decoration-line: underline;
-            cursor: pointer;
-          }
-        }
-
         .canvas {
           display: flex;
           flex-direction: column;
