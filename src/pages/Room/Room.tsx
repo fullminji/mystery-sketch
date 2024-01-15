@@ -5,6 +5,11 @@ import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
 import User, { UserInfo } from '../../components/User';
 
+interface AnswerObject {
+  id: number;
+  answer: string;
+}
+
 const Room: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
@@ -59,6 +64,47 @@ const Room: React.FC = () => {
     }
   }, [socket, roomId]);
 
+  // 단어 불러오기
+  const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
+  useEffect(() => {
+    fetch(`${api}/api/answer`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+    })
+      .then(res => res.json())
+      .then((data: AnswerObject[]) => {
+        setAnswerList(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
+
+  // 잠금
+  const [isLocked, setIsLocked] = useState(false);
+  const toggleLock = () => {
+    setIsLocked(!isLocked);
+  };
+
+  //사운드
+  const [isSound, setIsSound] = useState(true);
+  const toggleSound = () => {
+    setIsSound(!isSound);
+  };
+
+  // copy
+  const handleCopyToClipboard = () => {
+    const nickName = sessionStorage.getItem('nickName');
+
+    if (nickName === null) {
+      navigator.clipboard.writeText(`/main/${roomId}`);
+    } else {
+      alert('오류가 발생했습니다. 다시 시도해주세요.');
+    }
+  };
+
   return (
     <div className="page room">
       <div className="roomArea">
@@ -80,12 +126,15 @@ const Room: React.FC = () => {
             <div className="timeArea">
               <span className="time">90</span>
             </div>
-            <div className="answerArea">
-              <div className="answer">포</div>
-              <div className="answer" />
-              <div className="answer" />
-              <div className="answer" />
-            </div>
+            {answerList.map((answerObj, index) => (
+              <div className="answerArea" key={index}>
+                {answerObj.answer.split('').map((letter, letterIndex) => (
+                  <div className="answer" key={letterIndex}>
+                    {letter}
+                  </div>
+                ))}
+              </div>
+            ))}
             <div className="btnArea">
               <button type="button" className="btn">
                 포기
@@ -98,14 +147,32 @@ const Room: React.FC = () => {
         </div>
         <div className="roomGroup">
           <div className="settingArea">
-            <button type="button" className="btn lockOpen lockClose">
-              <span>잠금</span>
-              <span>열림</span>
-            </button>
-            <button type="button" className="btn soundOPen soundClose">
-              <span>사운드 켜기</span>
-              <span>사운드 끄기</span>
-            </button>
+            <div className="btnArea">
+              <button
+                type="button"
+                className={`btn${isLocked ? ' lockOpen' : ' lockClose'}`}
+                onClick={toggleLock}
+              >
+                <span>{isLocked ? '열림' : '잠금'}</span>
+              </button>
+              <button
+                type="button"
+                className={`btn${isSound ? ' soundOpen' : ' soundClose'}`}
+                onClick={toggleSound}
+              >
+                <span>{isSound ? '사운드 켜기' : '사운드 끄기'}</span>
+              </button>
+            </div>
+            <div className="copyArea">
+              <span>링크</span>
+              <button
+                type="button"
+                className="btn"
+                onClick={handleCopyToClipboard}
+              >
+                Copy
+              </button>
+            </div>
           </div>
           <div className="chatArea">
             <Chat socket={socket} userInfo={userInfo} roomId={roomId!} />

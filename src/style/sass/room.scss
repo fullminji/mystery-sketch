@@ -220,42 +220,65 @@
 
       .settingArea {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        justify-self: flex-end;
-        width: 70px;
-        height: 50px;
-        padding: 4px 10px;
-        border-radius: 6px;
-        background-color: rgba(238, 238, 238, 0.5);
+        flex-direction: column;
+        align-items: flex-end;
+        width: 100%;
 
-        .btn {
+        .btnArea {
           display: flex;
-          width: 30px;
-          height: 30px;
+          justify-content: space-between;
+          align-items: center;
+          width: 70px;
+          height: 32px;
+          padding: 4px 10px;
+          border-radius: 6px;
+          background-color: rgba(238, 238, 238, 0.5);
 
-          &.lockOPen {
-            background: url('../images/icon/lock_open.png') center / 30px 30px
-              no-repeat;
+          .btn {
+            display: flex;
+            width: 30px;
+            height: 30px;
+
+            &.lockOpen {
+              background: url('../images/icon/lock_open.png') center / 30px 30px
+                no-repeat;
+            }
+
+            &.lockClose {
+              background: url('../images/icon/lock_close.png') center / 30px
+                30px no-repeat;
+            }
+
+            &.soundOpen {
+              background: url('../images/icon/sound_open.png') center / 30px
+                30px no-repeat;
+            }
+
+            &.soundClose {
+              background: url('../images/icon/sound_close.png') center / 30px
+                30px no-repeat;
+            }
+
+            span {
+              @include blind;
+            }
           }
+        }
 
-          &.lockClose {
-            background: url('../images/icon/lock_close.png') center / 30px 30px
-              no-repeat;
-          }
+        .copyArea {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: calc(100% - 40px);
+          margin-top: 9px;
+          padding: 6px 20px;
+          color: #fff;
+          border-radius: 30px;
+          background-color: #425d88;
 
-          &.soundOpen {
-            background: url('../images/icon/sound_open.png') center / 30px 30px
-              no-repeat;
-          }
-
-          &.soundClose {
-            background: url('../images/icon/sound_close.png') center / 30px 30px
-              no-repeat;
-          }
-
-          span {
-            @include blind;
+          .btn {
+            padding-bottom: 4px;
+            border-bottom: 1px solid #fff;
           }
         }
       }
@@ -263,7 +286,7 @@
       .chatArea {
         width: 100%;
         height: 100%;
-        margin-top: 50px;
+        margin-top: 20px;
       }
     }
   }
