@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
@@ -16,6 +16,10 @@ const Room: React.FC = () => {
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
   const { roomId } = useParams<{ roomId?: string }>() ?? { roomId: '' };
   const [socket, setSocket] = useState<any>(null);
+  const navigate = useNavigate();
+
+  const nickName = sessionStorage.getItem('nickName');
+  const character = sessionStorage.getItem('character');
 
   const getUser = async () => {
     try {
@@ -31,6 +35,10 @@ const Room: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!nickName || !character) {
+      navigate(`/main/${roomId}`);
+      return () => {};
+    }
     getUser();
 
     //소켓 연결
@@ -93,16 +101,9 @@ const Room: React.FC = () => {
 
   // copy
   const handleCopyToClipboard = () => {
-    const nickName = sessionStorage.getItem('nickName');
-
-    if (nickName === null) {
-      navigator.clipboard.writeText(`/main/${roomId}`);
-    } else {
-      alert('오류가 발생했습니다. 다시 시도해주세요.');
-    }
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => alert('복사완료'));
   };
-
-  console.log(answerList);
 
   return (
     <div className="page room">
