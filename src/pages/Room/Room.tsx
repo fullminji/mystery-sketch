@@ -79,6 +79,17 @@ const Room: React.FC = () => {
     }
   }, [socket, roomId]);
 
+  // copy
+  const handleCopyToClipboard = () => {
+    const nickName = sessionStorage.getItem('nickName');
+
+    if (nickName === null) {
+      navigator.clipboard.writeText(`/main/${roomId}`);
+    } else {
+      alert('오류가 발생했습니다. 다시 시도해주세요.');
+    }
+  };
+
   return (
     <div className="page room">
       <div className="roomArea">
@@ -117,14 +128,26 @@ const Room: React.FC = () => {
         </div>
         <div className="roomGroup">
           <div className="settingArea">
-            <button type="button" className="btn lockOpen lockClose">
-              <span>잠금</span>
-              <span>열림</span>
-            </button>
-            <button type="button" className="btn soundOPen soundClose">
-              <span>사운드 켜기</span>
-              <span>사운드 끄기</span>
-            </button>
+            <div className="btnArea">
+              <button type="button" className="btn lockOpen lockClose">
+                <span>잠금</span>
+                <span>열림</span>
+              </button>
+              <button type="button" className="btn soundOPen soundClose">
+                <span>사운드 켜기</span>
+                <span>사운드 끄기</span>
+              </button>
+            </div>
+            <div className="copyArea">
+              <span>링크</span>
+              <button
+                type="button"
+                className="btn"
+                onClick={handleCopyToClipboard}
+              >
+                Copy
+              </button>
+            </div>
           </div>
           <div className="chatArea">
             <Chat socket={socket} userInfo={userInfo} />
