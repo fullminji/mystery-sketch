@@ -85,6 +85,7 @@ const Name = () => {
         const roomId = data && data.roomId;
         if (roomId) {
           sessionStorage.setItem('nickName', name);
+          sessionStorage.setItem('character', (currentIndex + 1).toString());
           navigate(`/room/${roomId}`);
         } else {
           alert('오류가 발생했습니다. 다시 시도해주세요.');
@@ -105,9 +106,8 @@ const Name = () => {
     } else if (!isValidName) {
       return alert('특수문자, 공백을 제외한 닉네임을 입력해주세요.');
     }
-    const character = currentIndex + 1;
     sessionStorage.setItem('nickName', name);
-    sessionStorage.setItem('character', character.toString());
+    sessionStorage.setItem('character', (currentIndex + 1).toString());
 
     navigate('/create');
   };
