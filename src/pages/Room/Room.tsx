@@ -5,6 +5,11 @@ import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
 import User, { UserInfo } from '../../components/User';
 
+interface AnswerObject {
+  id: number;
+  answer: string;
+}
+
 const Room: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [room, setRoom] = useState<string>();
@@ -79,6 +84,24 @@ const Room: React.FC = () => {
     }
   }, [socket, roomId]);
 
+  // 단어 불러오기
+  const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
+  useEffect(() => {
+    fetch(`${api}/api/answer`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+    })
+      .then(res => res.json())
+      .then((data: AnswerObject[]) => {
+        setAnswerList(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
+
   // 잠금
   const [isLocked, setIsLocked] = useState(false);
   const toggleLock = () => {
@@ -122,12 +145,15 @@ const Room: React.FC = () => {
             <div className="timeArea">
               <span className="time">90</span>
             </div>
-            <div className="answerArea">
-              <div className="answer">포</div>
-              <div className="answer" />
-              <div className="answer" />
-              <div className="answer" />
-            </div>
+            {answerList.map((answerObj, index) => (
+              <div className="answerArea" key={index}>
+                {answerObj.answer.split('').map((letter, letterIndex) => (
+                  <div className="answer" key={letterIndex}>
+                    {letter}
+                  </div>
+                ))}
+              </div>
+            ))}
             <div className="btnArea">
               <button type="button" className="btn">
                 포기
