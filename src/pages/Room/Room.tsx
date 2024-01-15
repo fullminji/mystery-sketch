@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
 import User, { UserInfo } from '../../components/User';
+import Sound from '../../components/Sound';
 
 interface AnswerObject {
   id: number;
@@ -88,12 +89,6 @@ const Room: React.FC = () => {
     setIsLocked(!isLocked);
   };
 
-  //사운드
-  const [isSound, setIsSound] = useState(true);
-  const toggleSound = () => {
-    setIsSound(!isSound);
-  };
-
   // copy
   const handleCopyToClipboard = () => {
     const nickName = sessionStorage.getItem('nickName');
@@ -155,13 +150,7 @@ const Room: React.FC = () => {
               >
                 <span>{isLocked ? '열림' : '잠금'}</span>
               </button>
-              <button
-                type="button"
-                className={`btn${isSound ? ' soundOpen' : ' soundClose'}`}
-                onClick={toggleSound}
-              >
-                <span>{isSound ? '사운드 켜기' : '사운드 끄기'}</span>
-              </button>
+              <Sound />
             </div>
             <div className="copyArea">
               <span>링크</span>

@@ -249,16 +249,6 @@
                 30px no-repeat;
             }
 
-            &.soundOpen {
-              background: url('../images/icon/sound_open.png') center / 30px
-                30px no-repeat;
-            }
-
-            &.soundClose {
-              background: url('../images/icon/sound_close.png') center / 30px
-                30px no-repeat;
-            }
-
             span {
               @include blind;
             }
