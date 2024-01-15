@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Carousel from './Carousel';
 import question from '../style/images/icon/question.svg';
 import logo from '../style/images/logo.png';
+import Sound from './Sound';
 
 type characterProps = {
   id: number;
@@ -148,6 +149,9 @@ const Name = () => {
             className="questionIcon"
             onClick={() => setIsToggled(true)}
           />
+          <div className="soundArea">
+            <Sound />
+          </div>
         </div>
         <div className="slideArea">
           <div className="characterBg" />

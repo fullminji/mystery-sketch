@@ -30,7 +30,6 @@ const User: React.FC<UserProps> = ({
 
   // 클라이언트 측에서 유저를 추방하는 로직 추가
   const handleExpelUser = (users_id: number, username: string) => {
-    const userExpel = userInfo.filter(user => user.users_id !== users_id);
     const updatedUsers = userInfo.filter(user => user.users_id !== users_id);
     setUserInfo(updatedUsers);
     const expulsionMessage = `${username}님이 추방되셨습니다.`;
@@ -41,11 +40,15 @@ const User: React.FC<UserProps> = ({
       type: 'expel',
     });
 
-    if (userExpel === updatedUsers) {
-      navigate('/');
-    }
     // 서버에 추방 정보 전송
     socket.emit('expelUser', { users_id, roomId });
+
+    socket.on('userExpelled', (expelledUserId: number) => {
+      if (users_id === expelledUserId) {
+        navigate('/');
+        console.log('추방 성공');
+      }
+    });
 
     console.log('추방유저 ID :', users_id, username);
   };

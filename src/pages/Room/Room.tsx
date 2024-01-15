@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
 import User, { UserInfo } from '../../components/User';
+import Sound from '../../components/Sound';
 
 interface AnswerObject {
   id: number;
@@ -82,16 +83,12 @@ const Room: React.FC = () => {
       });
   }, []);
 
+  const answerValues = answerList.map(item => item.answer);
+
   // 잠금
   const [isLocked, setIsLocked] = useState(false);
   const toggleLock = () => {
     setIsLocked(!isLocked);
-  };
-
-  //사운드
-  const [isSound, setIsSound] = useState(true);
-  const toggleSound = () => {
-    setIsSound(!isSound);
   };
 
   // copy
@@ -104,6 +101,8 @@ const Room: React.FC = () => {
       alert('오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
+
+  console.log(answerList);
 
   return (
     <div className="page room">
@@ -126,15 +125,32 @@ const Room: React.FC = () => {
             <div className="timeArea">
               <span className="time">90</span>
             </div>
-            {answerList.map((answerObj, index) => (
+            {/* {answerValues.map((answer, index) => (
               <div className="answerArea" key={index}>
-                {answerObj.answer.split('').map((letter, letterIndex) => (
-                  <div className="answer" key={letterIndex}>
+                {answer.split('').map((letter, letterIndex) => (
+                  <div
+                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
+                    key={letterIndex}
+                  >
                     {letter}
                   </div>
                 ))}
               </div>
-            ))}
+            ))} */}
+
+            {answerValues[0] && (
+              <div className="answerArea">
+                {answerValues[0].split('').map((letter, letterIndex) => (
+                  <div
+                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
+                    key={letterIndex}
+                  >
+                    {letter}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="btnArea">
               <button type="button" className="btn">
                 포기
@@ -142,7 +158,7 @@ const Room: React.FC = () => {
             </div>
           </div>
           <div className="changeArea">
-            <Canvas />
+            <Canvas socket={socket} roomId={roomId!} />
           </div>
         </div>
         <div className="roomGroup">
@@ -155,13 +171,7 @@ const Room: React.FC = () => {
               >
                 <span>{isLocked ? '열림' : '잠금'}</span>
               </button>
-              <button
-                type="button"
-                className={`btn${isSound ? ' soundOpen' : ' soundClose'}`}
-                onClick={toggleSound}
-              >
-                <span>{isSound ? '사운드 켜기' : '사운드 끄기'}</span>
-              </button>
+              <Sound />
             </div>
             <div className="copyArea">
               <span>링크</span>
