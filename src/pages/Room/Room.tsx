@@ -82,6 +82,8 @@ const Room: React.FC = () => {
       });
   }, []);
 
+  const answerValues = answerList.map(item => item.answer);
+
   // 잠금
   const [isLocked, setIsLocked] = useState(false);
   const toggleLock = () => {
@@ -105,6 +107,8 @@ const Room: React.FC = () => {
     }
   };
 
+  console.log(answerList);
+
   return (
     <div className="page room">
       <div className="roomArea">
@@ -126,15 +130,32 @@ const Room: React.FC = () => {
             <div className="timeArea">
               <span className="time">90</span>
             </div>
-            {answerList.map((answerObj, index) => (
+            {/* {answerValues.map((answer, index) => (
               <div className="answerArea" key={index}>
-                {answerObj.answer.split('').map((letter, letterIndex) => (
-                  <div className="answer" key={letterIndex}>
+                {answer.split('').map((letter, letterIndex) => (
+                  <div
+                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
+                    key={letterIndex}
+                  >
                     {letter}
                   </div>
                 ))}
               </div>
-            ))}
+            ))} */}
+
+            {answerValues[0] && (
+              <div className="answerArea">
+                {answerValues[0].split('').map((letter, letterIndex) => (
+                  <div
+                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
+                    key={letterIndex}
+                  >
+                    {letter}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="btnArea">
               <button type="button" className="btn">
                 포기
