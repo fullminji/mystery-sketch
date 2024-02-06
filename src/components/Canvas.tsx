@@ -48,7 +48,7 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
       });
 
       socket.on('eraser', (data: any) => {
-        handleErase(data);
+        handleEraser(data);
       });
 
       // socket.on('clear', () => {
@@ -76,6 +76,7 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
   type DrawEvent =
     | React.MouseEvent<HTMLCanvasElement, MouseEvent>
     | React.ChangeEvent<HTMLInputElement>;
+
   const drawFn = (e: DrawEvent) => {
     const canvas = canvasRef.current;
     if (canvas && ctx) {
@@ -110,32 +111,35 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
   };
 
   // 지우개
-  const eraserFn = () => {
+  const eraserFn = (e: DrawEvent) => {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
     const context = canvas?.getContext('2d');
     if (context && canvas) {
+      const mouseEvent = e as React.MouseEvent<HTMLCanvasElement, MouseEvent>;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (mouseEvent.clientX - rect.left) * scaleX;
+      const mouseY = (mouseEvent.clientY - rect.top) * scaleY;
       context.globalCompositeOperation = 'destination-out';
       context.strokeStyle = 'rgba(0,0,0,0)';
       context.lineWidth = 20;
 
-      const eraser = 'destination-out';
-      socket.emit('eraser', { eraser });
+      socket.emit('eraser', { x: mouseX, y: mouseY });
     }
   };
 
-  const handleErase = (data: any) => {
+  const handleEraser = (data: any) => {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
-    if (canvas && ctx) {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.strokeStyle = 'rgba(0,0,0,0)';
-      ctx.lineWidth = 20;
+    const context = canvas?.getContext('2d');
+    if (canvas && context) {
+      context.globalCompositeOperation = 'destination-out';
+      context.strokeStyle = 'rgba(0,0,0,0)';
+      context.lineWidth = 20;
 
-      if (data.eraser === 'destination-out') {
-        ctx.beginPath();
-        ctx.arc(data.x, data.y, 10, 0, 2 * Math.PI);
-        ctx.fill();
-        console.log('eraser: ', data);
-      }
+      context.beginPath();
+      context.arc(data.x, data.y, 10, 0, 2 * Math.PI);
+      context.fill();
     }
   };
 

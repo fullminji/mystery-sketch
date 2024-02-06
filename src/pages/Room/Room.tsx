@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
-import User, { UserInfo } from '../../components/User';
+import User, { UserInfo, GameRoomInfo } from '../../components/User';
 import Sound from '../../components/Sound';
 
 interface AnswerObject {
@@ -14,6 +14,7 @@ interface AnswerObject {
 const Room: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
+  const [gameRoomInfo, setGameRoomInfo] = useState<GameRoomInfo[]>([]);
   const { roomId } = useParams<{ roomId?: string }>() ?? { roomId: '' };
   const [socket, setSocket] = useState<any>(null);
   const navigate = useNavigate();
@@ -29,10 +30,13 @@ const Room: React.FC = () => {
       }
       const result = await response.json();
       setUserInfo(result.gameRoomInfo.users);
+      setGameRoomInfo(result.gameRoomInfo);
     } catch (error) {
       console.error('Fetch error:', error);
     }
   };
+
+  console.log('test', gameRoomInfo);
 
   useEffect(() => {
     if (!nickName || !character) {
@@ -118,6 +122,12 @@ const Room: React.FC = () => {
             socket={socket}
             setUserInfo={
               setUserInfo as React.Dispatch<React.SetStateAction<UserInfo[]>>
+            }
+            gameRoomInfo={gameRoomInfo}
+            setGameRoomInfo={
+              setGameRoomInfo as React.Dispatch<
+                React.SetStateAction<GameRoomInfo[]>
+              >
             }
           />
         </div>
