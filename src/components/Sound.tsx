@@ -7,7 +7,7 @@ const Sound = () => {
   return (
     <button
       type="button"
-      className={`btn${isSound ? ' soundOpen' : ' soundClose'}`}
+      className={`icon${isSound ? ' soundOpen' : ' soundClose'}`}
       onClick={() => setIsSound(!isSound)}
     />
   );

@@ -58,20 +58,20 @@ const Room: React.FC = () => {
   }, [roomId]);
 
   // //사용자 목록 업데이트
-  // useEffect(() => {
-  //   if (socket) {
-  //     socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
-  //     socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-  //       setUserInfo(updatedUserInfo);
-  //       console.log('User list updated성공이닭:', updatedUserInfo);
-  //       getUser();
-  //     });
+  useEffect(() => {
+    if (socket) {
+      socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
+      socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+        setUserInfo(updatedUserInfo);
+        console.log('User list updated성공이닭:', updatedUserInfo);
+        getUser();
+      });
 
-  //     return () => {
-  //       socket.off('userListUpdate');
-  //     };
-  //   }
-  // }, [socket, roomId]);
+      return () => {
+        socket.off('userListUpdate');
+      };
+    }
+  }, [socket, roomId]);
 
   // 단어 불러오기
   const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
