@@ -38,11 +38,30 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
       socket.on('draw', (data: any) => {
         drawOnCanvas(data);
       });
+
+      socket.on('color', (data: any) => {
+        setSelectedColor(data.color);
+        // console.log(data.color);
+        if (canvas && ctx) {
+          ctx.strokeStyle = data.color;
+        }
+      });
+
+      socket.on('eraser', (data: any) => {
+        handleErase(data);
+      });
+
+      // socket.on('clear', () => {
+      //   // clearCanvas();
+      // });
     }
 
     return () => {
       if (socket) {
         socket.off('draw');
+        socket.off('color');
+        socket.off('eraser');
+        // socket.off('clear');
       }
     };
   }, [socket, ctx]);
@@ -96,7 +115,27 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
     const context = canvas?.getContext('2d');
     if (context && canvas) {
       context.globalCompositeOperation = 'destination-out';
+      context.strokeStyle = 'rgba(0,0,0,0)';
       context.lineWidth = 20;
+
+      const eraser = 'destination-out';
+      socket.emit('eraser', { eraser });
+    }
+  };
+
+  const handleErase = (data: any) => {
+    const canvas: HTMLCanvasElement | null = canvasRef.current;
+    if (canvas && ctx) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,0)';
+      ctx.lineWidth = 20;
+
+      if (data.eraser === 'destination-out') {
+        ctx.beginPath();
+        ctx.arc(data.x, data.y, 10, 0, 2 * Math.PI);
+        ctx.fill();
+        console.log('eraser: ', data);
+      }
     }
   };
 
@@ -106,6 +145,7 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
     const context = canvas?.getContext('2d');
     if (context && canvas) {
       context.clearRect(0, 0, canvas.width, canvas.height);
+      // socket.emit('clear');
     }
     setPainting(false);
   };
