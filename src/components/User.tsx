@@ -9,23 +9,34 @@ export interface UserInfo {
   image_link: string;
   roomId: string;
 }
+
+export interface GameRoomInfo {
+  round: number;
+}
+
 interface UserProps {
   userInfo: UserInfo[];
   setUserInfo: React.Dispatch<React.SetStateAction<UserInfo[]>>; // setUserInfo를 함수 타입으로 수정
   socket: any;
   roomId: string;
+  gameRoomInfo: GameRoomInfo[];
+  setGameRoomInfo: React.Dispatch<React.SetStateAction<GameRoomInfo[]>>;
 }
 const User: React.FC<UserProps> = ({
   userInfo,
   socket,
   setUserInfo,
   roomId,
+  gameRoomInfo,
+  setGameRoomInfo,
 }) => {
   const navigate = useNavigate();
   const name = sessionStorage.getItem('nickName');
 
   useEffect(() => {
     console.log('userInfo updated:', userInfo);
+
+    // console.log('test: ', gameRoomInfo);
   }, [userInfo, userInfo.length]);
 
   // 클라이언트 측에서 유저를 추방하는 로직 추가
@@ -69,9 +80,9 @@ const User: React.FC<UserProps> = ({
   return (
     <div className="user">
       <ul className="userArea">
-        {userInfo.map(user => {
+        {userInfo.map((user, index) => {
           const { score, isAdmin, username, users_id, image_link } = user;
-
+          const isPencil = index === gameRoomInfo[0]?.round;
           return (
             <li key={users_id}>
               <div className="users">
@@ -81,7 +92,11 @@ const User: React.FC<UserProps> = ({
                   </span>
                   <span className="point">{score} POINT</span>
                 </div>
-                <div className={`char pencil ${isAdmin === 1 ? 'crown' : ''}`}>
+                <div
+                  className={`char${isPencil ? ' pencil' : ''}${
+                    isAdmin === 1 ? ' crown' : ''
+                  }`}
+                >
                   <img src={image_link} alt="캐릭터" />
                 </div>
               </div>

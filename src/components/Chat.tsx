@@ -46,7 +46,7 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
     }
   }, [socket, message, username]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (message.trim() !== '') {
@@ -83,7 +83,7 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
               onChange={e => {
                 setMessage(e.target.value);
               }}
-              onKeyDown={handleKeyDown}
+              onKeyUp={handleKeyUp}
             />
             <img onClick={sendMessage} src={SendButton} alt="SendButton" />
           </div>
