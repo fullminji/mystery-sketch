@@ -53,10 +53,11 @@ const Room: React.FC = () => {
 
     //소켓 연결
     const newSocket = io(`${api}`, {
+      transports: ['websocket'],
       query: {
         roomId,
-        users_id:
-          userInfo.length > 0 ? userInfo[userInfo.length - 1].users_id : null,
+        // users_id:
+        //   userInfo.length > 0 ? userInfo[userInfo.length - 1].users_id : null,
       },
     });
     setSocket(newSocket);
@@ -64,6 +65,20 @@ const Room: React.FC = () => {
 
     newSocket.on('roomSetting', (setting: any) => {
       setRoomSetting(setting[0]);
+    });
+
+    // 사용자 목록 업데이트
+    newSocket.emit('newUserJoined', { roomId: Number(roomId) });
+    newSocket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+      setUserInfo(updatedUserInfo);
+      console.log('User list updated 성공:', updatedUserInfo);
+      getUser();
+    });
+    // 연결 해제 시 처리
+    newSocket.on('disconnect', () => {
+      // 여기에 소켓 연결 해제 시 수행할 작업을 추가하세요.
+      // navigate('/');
+      console.log('소켓이 연결 해제되었습니다.');
     });
 
     return () => {
@@ -95,12 +110,6 @@ const Room: React.FC = () => {
   const [timer, setTimer] = useState<Number | undefined>(roomSetting?.time);
 
   useEffect(() => {
-    if (socket) {
-      socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
-      socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-        setUserInfo(updatedUserInfo);
-        console.log('User list updated성공이닭:', updatedUserInfo);
-        getUser();
     if (roomSetting?.time !== undefined) {
       setTimer(roomSetting.time);
     }
@@ -126,11 +135,6 @@ const Room: React.FC = () => {
       });
     }, 1000);
 
-      return () => {
-        socket.off('userListUpdate');
-      };
-    }
-  }, [socket, roomId]);
     return () => clearInterval(interval);
   };
 
@@ -210,7 +214,6 @@ const Room: React.FC = () => {
                 ))}
               </div>
             ))} */}
-
             {answerValues[0] && (
               <div className="answerArea">
                 {answerValues[0].split('').map((letter, letterIndex) => (
@@ -223,7 +226,6 @@ const Room: React.FC = () => {
                 ))}
               </div>
             )}
-
             <div className="btnArea">
               <button type="button" className="btn">
                 포기
