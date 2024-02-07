@@ -22,21 +22,15 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
     setMessages(prevMessages => [...prevMessages, data]);
   }, []);
 
-  const systemMessageHandler = useCallback((data: Message) => {
-    setMessages(prevMessages => [...prevMessages, data]);
-  }, []);
-
   useEffect(() => {
     if (socket) {
       socket.on('message', messageHandler);
-      socket.on('systemMessage', systemMessageHandler);
 
       return () => {
         socket.off('message', messageHandler);
-        socket.off('systemMessage', systemMessageHandler);
       };
     }
-  }, [socket, messageHandler, systemMessageHandler]);
+  }, [socket, messageHandler]);
 
   const sendMessage = useCallback(() => {
     if (socket && message.trim() !== '') {
