@@ -5,6 +5,7 @@ import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
 import User, { UserInfo, GameRoomInfo } from '../../components/User';
 import Sound from '../../components/Sound';
+import Start from '../../components/Start';
 
 interface AnswerObject {
   id: number;
@@ -109,6 +110,11 @@ const Room: React.FC = () => {
     navigator.clipboard.writeText(url).then(() => alert('복사완료'));
   };
 
+  // 게임시작
+  const handleStart = () => {
+    socket.emit('gameStart');
+  };
+
   return (
     <div className="page room">
       <div className="roomArea">
@@ -167,6 +173,9 @@ const Room: React.FC = () => {
                 포기
               </button>
             </div>
+          </div>
+          <div className="startArea">
+            <Start handleStart={handleStart} />
           </div>
           <div className="changeArea">
             <Canvas socket={socket} roomId={roomId!} />
