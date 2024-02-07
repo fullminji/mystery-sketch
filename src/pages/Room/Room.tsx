@@ -62,6 +62,27 @@ const Room: React.FC = () => {
     };
   }, [roomId]);
 
+  // 게임 진행 라운드
+  const [isRound, setIsRound] = useState<number>(1);
+  useEffect(() => {
+    fetch(`${api}/api/round`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify({
+        isRound: isRound,
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        setIsRound(data.isRound);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
+
   // //사용자 목록 업데이트
   useEffect(() => {
     if (socket) {
