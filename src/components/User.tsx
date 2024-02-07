@@ -35,8 +35,6 @@ const User: React.FC<UserProps> = ({
 
   useEffect(() => {
     console.log('userInfo updated:', userInfo);
-
-    // console.log('test: ', gameRoomInfo);
   }, [userInfo, userInfo.length]);
 
   // 클라이언트 측에서 유저를 추방하는 로직 추가

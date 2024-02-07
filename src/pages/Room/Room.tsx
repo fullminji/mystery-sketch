@@ -86,27 +86,6 @@ const Room: React.FC = () => {
     };
   }, [roomId]);
 
-  // 게임 진행 라운드
-  const [isRound, setIsRound] = useState<number>(1);
-  useEffect(() => {
-    fetch(`${api}/api/round`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8',
-      },
-      body: JSON.stringify({
-        isRound: isRound,
-      }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        setIsRound(data.isRound);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
-
   const [timer, setTimer] = useState<Number | undefined>(roomSetting?.time);
 
   useEffect(() => {
@@ -122,6 +101,10 @@ const Room: React.FC = () => {
           const newTimer = prevTimer - 1;
           if (newTimer === 0) {
             clearInterval(interval);
+            socket.emit('isRound', {
+              isRound: isRound + 1,
+              roomId: Number(roomId),
+            });
           }
           socket?.emit('remainTimer', {
             remainTime: newTimer,
@@ -169,11 +152,39 @@ const Room: React.FC = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => alert('복사완료'));
   };
+
   // 게임시작
   const handleStart = () => {
     socket.emit('gameStart');
     handleTimer();
+    handleIsRound();
   };
+
+  // 게임 진행 라운드
+  const [isRound, setIsRound] = useState<number>(1);
+  const handleIsRound = () => {
+    fetch(`${api}/api/gameRoom/currentRound`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify({
+        roomId: roomId,
+        isRound: isRound,
+      }),
+    })
+      .then(res => res.json())
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  useEffect(() => {
+    handleIsRound();
+    if (isRound === roomSetting?.round) {
+      socket?.emit('gameEnd', { message: 'Game Over' });
+    }
+  }, []);
 
   return (
     <div className="page room">
