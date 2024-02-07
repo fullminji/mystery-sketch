@@ -63,7 +63,8 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
           <div className="chatBox" ref={chatBoxRef}>
             {messages.map((msg, index) => (
               <p key={index}>
-                {msg.username}님 : {msg.message}
+                {msg.username ? `${msg.username}님 :` : ''}
+                {msg.message === 'start' ? '게임시작' : `${msg.message}`}
               </p>
             ))}
           </div>
