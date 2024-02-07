@@ -12,6 +12,12 @@ interface AnswerObject {
   answer: string;
 }
 
+interface settingProps {
+  time: number;
+  max_players: number;
+  round: number;
+}
+
 const Room: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
@@ -22,6 +28,7 @@ const Room: React.FC = () => {
 
   const nickName = sessionStorage.getItem('nickName');
   const character = sessionStorage.getItem('character');
+  const [roomSetting, setRoomSetting] = useState<settingProps>();
 
   const getUser = async () => {
     try {
@@ -37,8 +44,6 @@ const Room: React.FC = () => {
     }
   };
 
-  console.log('test', gameRoomInfo);
-
   useEffect(() => {
     if (!nickName || !character) {
       navigate(`/main/${roomId}`);
@@ -48,14 +53,33 @@ const Room: React.FC = () => {
 
     //소켓 연결
     const newSocket = io(`${api}`, {
+      transports: ['websocket'],
       query: {
         roomId,
-        users_id:
-          userInfo.length > 0 ? userInfo[userInfo.length - 1].users_id : null,
+        // users_id:
+        //   userInfo.length > 0 ? userInfo[userInfo.length - 1].users_id : null,
       },
     });
     setSocket(newSocket);
     console.log('연결성공');
+
+    newSocket.on('roomSetting', (setting: any) => {
+      setRoomSetting(setting[0]);
+    });
+
+    // 사용자 목록 업데이트
+    newSocket.emit('newUserJoined', { roomId: Number(roomId) });
+    newSocket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
+      setUserInfo(updatedUserInfo);
+      console.log('User list updated 성공:', updatedUserInfo);
+      getUser();
+    });
+    // 연결 해제 시 처리
+    newSocket.on('disconnect', () => {
+      // 여기에 소켓 연결 해제 시 수행할 작업을 추가하세요.
+      // navigate('/');
+      console.log('소켓이 연결 해제되었습니다.');
+    });
 
     return () => {
       newSocket.disconnect();
@@ -83,21 +107,36 @@ const Room: React.FC = () => {
       });
   }, []);
 
-  // //사용자 목록 업데이트
-  useEffect(() => {
-    if (socket) {
-      socket.emit('newUserJoined', { roomId: Number(roomId) }); // 새로운 유저가 방에 들어왔다고 서버에 알림
-      socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-        setUserInfo(updatedUserInfo);
-        console.log('User list updated성공이닭:', updatedUserInfo);
-        getUser();
-      });
+  const [timer, setTimer] = useState<Number | undefined>(roomSetting?.time);
 
-      return () => {
-        socket.off('userListUpdate');
-      };
+  useEffect(() => {
+    if (roomSetting?.time !== undefined) {
+      setTimer(roomSetting.time);
     }
-  }, [socket, roomId]);
+  }, [roomSetting]);
+
+  const handleTimer = () => {
+    const interval = setInterval(() => {
+      setTimer(prevTimer => {
+        if (typeof prevTimer === 'number' && prevTimer > 0) {
+          const newTimer = prevTimer - 1;
+          if (newTimer === 0) {
+            clearInterval(interval);
+          }
+          socket?.emit('remainTimer', {
+            remainTime: newTimer,
+            roomId: Number(roomId),
+          });
+          return newTimer;
+        } else {
+          clearInterval(interval);
+          return 0;
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  };
 
   // 단어 불러오기
   const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
@@ -130,10 +169,10 @@ const Room: React.FC = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => alert('복사완료'));
   };
-
   // 게임시작
   const handleStart = () => {
     socket.emit('gameStart');
+    handleTimer();
   };
 
   return (
@@ -161,7 +200,7 @@ const Room: React.FC = () => {
         <div className="roomGroup">
           <div className="quizArea">
             <div className="timeArea">
-              <span className="time">90</span>
+              <span className="time">{String(timer)}</span>
             </div>
             {/* {answerValues.map((answer, index) => (
               <div className="answerArea" key={index}>
@@ -175,7 +214,6 @@ const Room: React.FC = () => {
                 ))}
               </div>
             ))} */}
-
             {answerValues[0] && (
               <div className="answerArea">
                 {answerValues[0].split('').map((letter, letterIndex) => (
@@ -188,7 +226,6 @@ const Room: React.FC = () => {
                 ))}
               </div>
             )}
-
             <div className="btnArea">
               <button type="button" className="btn">
                 포기
