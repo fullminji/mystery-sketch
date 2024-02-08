@@ -6,6 +6,7 @@ import Chat from '../../components/Chat';
 import User, { UserInfo, GameRoomInfo } from '../../components/User';
 import Sound from '../../components/Sound';
 import Start from '../../components/Start';
+import Result from '../../components/Result';
 
 interface AnswerObject {
   id: number;
@@ -102,7 +103,7 @@ const Room: React.FC = () => {
           if (newTimer === 0) {
             clearInterval(interval);
             socket.emit('isRound', {
-              isRound: isRound + 1,
+              isRound: isRound,
               roomId: Number(roomId),
             });
           }
@@ -179,12 +180,19 @@ const Room: React.FC = () => {
       });
   };
 
+  const [gameEnd, setGameEnd] = useState(false);
   useEffect(() => {
     handleIsRound();
-    if (isRound === roomSetting?.round) {
-      socket?.emit('gameEnd', { message: 'Game Over' });
-    }
-  }, []);
+    const gameEndCheck = () => {
+      if (isRound === roomSetting?.round) {
+        socket?.emit('gameEnd', { roomId: roomId });
+        setGameEnd(true);
+      }
+      console.log(isRound, roomSetting?.round);
+    };
+
+    gameEndCheck();
+  }, [isRound, roomSetting?.round]);
 
   return (
     <div className="page room">
@@ -287,9 +295,16 @@ const Room: React.FC = () => {
             </div>
           </div>
           <div className="chatArea">
-            <Chat socket={socket} userInfo={userInfo} roomId={roomId!} />
+            <Chat
+              socket={socket}
+              userInfo={userInfo}
+              roomId={roomId!}
+              isRound={isRound}
+              setIsRound={setIsRound}
+            />
           </div>
         </div>
+        {gameEnd && <Result />}
       </div>
     </div>
   );

@@ -10,9 +10,17 @@ interface UserProps {
   userInfo: UserInfo[];
   socket: any;
   roomId: string;
+  isRound: number;
+  setIsRound: any;
 }
 
-const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
+const Chat: React.FC<UserProps> = ({
+  userInfo,
+  socket,
+  roomId,
+  isRound,
+  setIsRound,
+}) => {
   const [message, setMessage] = useState<string>('');
   const username = sessionStorage.getItem('nickName');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -25,6 +33,12 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
   useEffect(() => {
     if (socket) {
       socket.on('message', messageHandler);
+      socket.on('isRound', (data: any) => {
+        console.log('test2:', data);
+        setIsRound(data);
+      });
+
+      console.log('test:', isRound);
 
       return () => {
         socket.off('message', messageHandler);
@@ -62,10 +76,11 @@ const Chat: React.FC<UserProps> = ({ userInfo, socket, roomId }) => {
         <div className="messages">
           <div className="chatBox" ref={chatBoxRef}>
             {messages.map((msg, index) => (
-              <p key={index}>
-                {msg.username ? `${msg.username}님 :` : ''}
-                {msg.message === 'start' ? '게임시작' : `${msg.message}`}
-              </p>
+              <div key={index}>
+                <p>{msg.username ? `${msg.username}님 :` : ''}</p>
+                <p>{msg.message === 'start' ? '게임시작' : `${msg.message}`}</p>
+                <p>{isRound ? `${isRound}라운드 입니다.` : ''}</p>
+              </div>
             ))}
           </div>
         </div>
