@@ -238,7 +238,7 @@ const Room: React.FC = () => {
                       className={
                         (letterIndex === 0 &&
                           roomSetting?.time &&
-                          String(roomSetting.time / 2)) ||
+                          Number(timer) < roomSetting.time / 2) ||
                         Number(timer) === 0
                           ? 'answer'
                           : 'answer hidden'
