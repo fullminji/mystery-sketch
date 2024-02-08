@@ -33,6 +33,8 @@ const Room: React.FC = () => {
 
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const [gameEnd, setGameEnd] = useState(false);
+
   const getUser = async () => {
     try {
       const response = await fetch(`${api}/api/gameRoom/${roomId}`);
@@ -89,40 +91,58 @@ const Room: React.FC = () => {
     };
   }, [roomId]);
 
-  const [timer, setTimer] = useState<Number | undefined>(roomSetting?.time);
+  const [timer, setTimer] = useState(roomSetting?.time ?? 0);
+  const [isRound, setIsRound] = useState<number>(1);
 
-  useEffect(() => {
-    if (roomSetting?.time !== undefined) {
-      setTimer(roomSetting.time);
-    }
-  }, [roomSetting]);
+  const handleStart = () => {
+    socket.emit('gameStart');
+    handleTimer();
+  };
 
   const handleTimer = () => {
     const interval = setInterval(() => {
       setTimer(prevTimer => {
-        if (typeof prevTimer === 'number' && prevTimer > 0) {
+        if (typeof prevTimer === 'number' && roomSetting) {
           const newTimer = prevTimer - 1;
-          if (newTimer === 0) {
+          if (newTimer < 0) {
             clearInterval(interval);
             socket.emit('isRound', {
               isRound: isRound,
               roomId: Number(roomId),
             });
+            return roomSetting?.time;
           }
           socket?.emit('remainTimer', {
             remainTime: newTimer,
             roomId: Number(roomId),
           });
           return newTimer;
-        } else {
-          clearInterval(interval);
-          return 0;
         }
+        return prevTimer;
       });
     }, 1000);
 
     return () => clearInterval(interval);
   };
+
+  useEffect(() => {
+    if (socket && roomSetting && !gameEnd) {
+      const isRoundListener = () => {
+        handleTimer();
+      };
+      socket.on('isRound', isRoundListener);
+
+      return () => {
+        socket.off('isRound', isRoundListener);
+      };
+    }
+  }, [socket, isRound]);
+
+  useEffect(() => {
+    if (roomSetting?.time !== undefined) {
+      setTimer(roomSetting.time);
+    }
+  }, [roomSetting]);
 
   // 남은 시간 (방장 제외)
   useEffect(() => {
@@ -178,15 +198,8 @@ const Room: React.FC = () => {
     }
   }, [nickName, userInfo]);
 
-  // 게임시작
-  const handleStart = () => {
-    socket.emit('gameStart');
-    handleTimer();
-    handleIsRound();
-  };
-
   // 게임 진행 라운드
-  const [isRound, setIsRound] = useState<number>(1);
+
   const handleIsRound = () => {
     fetch(`${api}/api/gameRoom/currentRound`, {
       method: 'PUT',
@@ -204,7 +217,6 @@ const Room: React.FC = () => {
       });
   };
 
-  const [gameEnd, setGameEnd] = useState(false);
   useEffect(() => {
     handleIsRound();
     const gameEndCheck = () => {
