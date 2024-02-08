@@ -200,7 +200,11 @@ const Room: React.FC = () => {
         <div className="roomGroup">
           <div className="quizArea">
             <div className="timeArea">
-              <span className="time">{String(timer)}</span>
+              {timer ? (
+                <span className="time">{String(timer)}</span>
+              ) : (
+                <span className="time">0</span>
+              )}
             </div>
             {/* {answerValues.map((answer, index) => (
               <div className="answerArea" key={index}>
@@ -214,16 +218,25 @@ const Room: React.FC = () => {
                 ))}
               </div>
             ))} */}
-            {answerValues[0] && (
+            {answerValues[isRound - 1] && (
               <div className="answerArea">
-                {answerValues[0].split('').map((letter, letterIndex) => (
-                  <div
-                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
-                    key={letterIndex}
-                  >
-                    {letter}
-                  </div>
-                ))}
+                {answerValues[isRound - 1]
+                  .split('')
+                  .map((letter, letterIndex) => (
+                    <div
+                      className={
+                        (letterIndex === 0 &&
+                          roomSetting?.time &&
+                          String(roomSetting.time / 2)) ||
+                        Number(timer) === 0
+                          ? 'answer'
+                          : 'answer hidden'
+                      }
+                      key={letterIndex}
+                    >
+                      {letter}
+                    </div>
+                  ))}
               </div>
             )}
             <div className="btnArea">
