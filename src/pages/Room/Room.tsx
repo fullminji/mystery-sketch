@@ -31,6 +31,8 @@ const Room: React.FC = () => {
   const character = sessionStorage.getItem('character');
   const [roomSetting, setRoomSetting] = useState<settingProps>();
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const getUser = async () => {
     try {
       const response = await fetch(`${api}/api/gameRoom/${roomId}`);
@@ -122,6 +124,20 @@ const Room: React.FC = () => {
     return () => clearInterval(interval);
   };
 
+  // 남은 시간 (방장 제외)
+  useEffect(() => {
+    if (socket && !isAdmin) {
+      const handleUpdateTimer = (timerValue: number) => {
+        setTimer(timerValue);
+      };
+      socket.on('updateTimer', handleUpdateTimer);
+
+      return () => {
+        socket.off('updateTimer', handleUpdateTimer);
+      };
+    }
+  }, [isAdmin, socket]);
+
   // 단어 불러오기
   const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
   useEffect(() => {
@@ -153,6 +169,14 @@ const Room: React.FC = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => alert('복사완료'));
   };
+
+  // 방장 구별
+  useEffect(() => {
+    const adminUser = userInfo.find(user => user.isAdmin === 1);
+    if (adminUser && adminUser.username === nickName) {
+      setIsAdmin(true);
+    }
+  }, [nickName, userInfo]);
 
   // 게임시작
   const handleStart = () => {
@@ -225,18 +249,6 @@ const Room: React.FC = () => {
                 <span className="time">0</span>
               )}
             </div>
-            {/* {answerValues.map((answer, index) => (
-              <div className="answerArea" key={index}>
-                {answer.split('').map((letter, letterIndex) => (
-                  <div
-                    className={letterIndex === 0 ? 'answer' : 'answer hidden'}
-                    key={letterIndex}
-                  >
-                    {letter}
-                  </div>
-                ))}
-              </div>
-            ))} */}
             {answerValues[isRound - 1] && (
               <div className="answerArea">
                 {answerValues[isRound - 1]
@@ -264,9 +276,11 @@ const Room: React.FC = () => {
               </button>
             </div>
           </div>
+          {/* {isAdmin && ( */}
           <div className="startArea">
             <Start handleStart={handleStart} />
           </div>
+          {/* )} */}
           <div className="changeArea">
             <Canvas socket={socket} roomId={roomId!} />
           </div>
