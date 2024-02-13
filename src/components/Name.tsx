@@ -87,6 +87,8 @@ const Name = () => {
           sessionStorage.setItem('nickName', name);
           sessionStorage.setItem('character', (currentIndex + 1).toString());
           navigate(`/room/${roomId}`);
+        } else if (data.message === 'NICKNAME_DOUBLE_CHECKED_ERROR') {
+          alert('중복 닉네임입니다.');
         } else {
           alert('오류가 발생했습니다. 다시 시도해주세요.');
         }
