@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import Canvas from '../../components/Canvas';
@@ -94,41 +94,68 @@ const Room: React.FC = () => {
   const [timer, setTimer] = useState(roomSetting?.time ?? 0);
   const [isRound, setIsRound] = useState<number>(1);
 
+  // 게임 진행 라운드
+  const handleIsRound = useCallback(() => {
+    fetch(`${api}/api/gameRoom/currentRound`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify({
+        roomId: roomId,
+        isRound: isRound,
+      }),
+    })
+      .then(res => res.json())
+      .catch(error => {
+        console.error(error);
+      });
+  }, [api, roomId, isRound]);
+
+  const [start, setStart] = useState(false);
+
   const handleStart = () => {
     socket.emit('gameStart');
-    handleTimer();
+    handleIsRound();
+    setStart(true);
   };
 
-  const handleTimer = () => {
-    const interval = setInterval(() => {
-      setTimer(prevTimer => {
-        if (typeof prevTimer === 'number' && roomSetting) {
-          const newTimer = prevTimer - 1;
-          if (newTimer < 0) {
-            clearInterval(interval);
-            socket.emit('isRound', {
-              isRound: isRound,
+  // 타이머 로직
+  useEffect(() => {
+    let interval: any;
+
+    if (start) {
+      interval = setInterval(() => {
+        setTimer(prevTimer => {
+          if (typeof prevTimer === 'number' && roomSetting) {
+            const newTimer = prevTimer - 1;
+            if (newTimer < 0) {
+              clearInterval(interval);
+              socket.emit('isRound', {
+                isRound: isRound,
+                roomId: Number(roomId),
+              });
+              return roomSetting?.time;
+            }
+            socket?.emit('remainTimer', {
+              remainTime: newTimer,
               roomId: Number(roomId),
             });
-            return roomSetting?.time;
+            return newTimer;
           }
-          socket?.emit('remainTimer', {
-            remainTime: newTimer,
-            roomId: Number(roomId),
-          });
-          return newTimer;
-        }
-        return prevTimer;
-      });
-    }, 1000);
+          return prevTimer;
+        });
+      }, 1000);
+    }
 
     return () => clearInterval(interval);
-  };
+  }, [socket, start, isRound]);
 
+  // 다음 라운드 진행 시 타이머 리셋
   useEffect(() => {
-    if (socket && roomSetting && !gameEnd) {
+    if (socket && roomSetting && isAdmin && !gameEnd) {
       const isRoundListener = () => {
-        handleTimer();
+        handleIsRound();
       };
       socket.on('isRound', isRoundListener);
 
@@ -144,9 +171,9 @@ const Room: React.FC = () => {
     }
   }, [roomSetting]);
 
-  // 남은 시간 (방장 제외)
+  // 남은 시간
   useEffect(() => {
-    if (socket && !isAdmin) {
+    if (socket) {
       const handleUpdateTimer = (timerValue: number) => {
         setTimer(timerValue);
       };
@@ -156,7 +183,7 @@ const Room: React.FC = () => {
         socket.off('updateTimer', handleUpdateTimer);
       };
     }
-  }, [isAdmin, socket]);
+  }, [socket, timer]);
 
   // 단어 불러오기
   const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
@@ -198,37 +225,18 @@ const Room: React.FC = () => {
     }
   }, [nickName, userInfo]);
 
-  // 게임 진행 라운드
-
-  const handleIsRound = () => {
-    fetch(`${api}/api/gameRoom/currentRound`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8',
-      },
-      body: JSON.stringify({
-        roomId: roomId,
-        isRound: isRound,
-      }),
-    })
-      .then(res => res.json())
-      .catch(error => {
-        console.error(error);
-      });
-  };
-
   useEffect(() => {
-    handleIsRound();
     const gameEndCheck = () => {
-      if (isRound === roomSetting?.round) {
+      if (isRound === roomSetting?.round && timer === 0) {
         socket?.emit('gameEnd', { roomId: roomId });
+        setStart(false);
         setGameEnd(true);
       }
       console.log(isRound, roomSetting?.round);
     };
 
     gameEndCheck();
-  }, [isRound, roomSetting?.round]);
+  }, [socket, roomId, timer, isRound, roomSetting?.round, gameEnd]);
 
   return (
     <div className="page room">
