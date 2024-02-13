@@ -34,11 +34,8 @@ const Chat: React.FC<UserProps> = ({
     if (socket) {
       socket.on('message', messageHandler);
       socket.on('isRound', (data: any) => {
-        console.log('test2:', data);
         setIsRound(data);
       });
-
-      console.log('test:', isRound);
 
       return () => {
         socket.off('message', messageHandler);
@@ -74,13 +71,21 @@ const Chat: React.FC<UserProps> = ({
     <div className="chat">
       <div className="chatContainer">
         <div className="messages">
+          <div className="chatTop">
+            {messages.find(msg => msg.message === 'start') && (
+              <>
+                <p>게임시작</p>
+                <p>{isRound ? `${isRound}라운드 입니다.` : ''}</p>
+              </>
+            )}
+          </div>
           <div className="chatBox" ref={chatBoxRef}>
             {messages.map((msg, index) => (
-              <div key={index}>
-                <p>{msg.username ? `${msg.username}님 :` : ''}</p>
-                <p>{msg.message === 'start' ? '게임시작' : `${msg.message}`}</p>
-                <p>{isRound ? `${isRound}라운드 입니다.` : ''}</p>
-              </div>
+              <p key={index}>
+                {msg.username
+                  ? `${msg.username}님 : ${msg.message}`
+                  : msg.message}
+              </p>
             ))}
           </div>
         </div>
