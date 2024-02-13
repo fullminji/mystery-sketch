@@ -81,8 +81,8 @@ const Room: React.FC = () => {
     });
     // 연결 해제 시 처리
     newSocket.on('disconnect', () => {
-      // 여기에 소켓 연결 해제 시 수행할 작업을 추가하세요.
       // navigate('/');
+      // sessionStorage.clear();
       console.log('소켓이 연결 해제되었습니다.');
     });
 
