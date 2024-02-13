@@ -19,16 +19,14 @@ interface UserProps {
   setUserInfo: React.Dispatch<React.SetStateAction<UserInfo[]>>; // setUserInfo를 함수 타입으로 수정
   socket: any;
   roomId: string;
-  gameRoomInfo: GameRoomInfo[];
-  setGameRoomInfo: React.Dispatch<React.SetStateAction<GameRoomInfo[]>>;
+  isRound: any;
 }
 const User: React.FC<UserProps> = ({
   userInfo,
   socket,
   setUserInfo,
   roomId,
-  gameRoomInfo,
-  setGameRoomInfo,
+  isRound,
 }) => {
   const navigate = useNavigate();
   const name = sessionStorage.getItem('nickName');
@@ -36,6 +34,12 @@ const User: React.FC<UserProps> = ({
   useEffect(() => {
     console.log('userInfo updated:', userInfo);
   }, [userInfo, userInfo.length]);
+
+  useEffect(() => {
+    if (isRound) {
+      socket?.emit('pencil', { pencil: isRound, roomId: roomId });
+    }
+  }, [isRound, socket]);
 
   // 클라이언트 측에서 유저를 추방하는 로직 추가
   const handleExpelUser = (users_id: number, username: string) => {
@@ -80,7 +84,6 @@ const User: React.FC<UserProps> = ({
       <ul className="userArea">
         {userInfo.map((user, index) => {
           const { score, isAdmin, username, users_id, image_link } = user;
-          const isPencil = index === gameRoomInfo[0]?.round;
           return (
             <li key={users_id}>
               <div className="users">
@@ -91,7 +94,7 @@ const User: React.FC<UserProps> = ({
                   <span className="point">{score} POINT</span>
                 </div>
                 <div
-                  className={`char${isPencil ? ' pencil' : ''}${
+                  className={`char${index === isRound - 1 ? ' pencil' : ''}${
                     isAdmin === 1 ? ' crown' : ''
                   }`}
                 >
