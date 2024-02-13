@@ -208,12 +208,7 @@ const Room: React.FC = () => {
             setUserInfo={
               setUserInfo as React.Dispatch<React.SetStateAction<UserInfo[]>>
             }
-            gameRoomInfo={gameRoomInfo}
-            setGameRoomInfo={
-              setGameRoomInfo as React.Dispatch<
-                React.SetStateAction<GameRoomInfo[]>
-              >
-            }
+            isRound={isRound}
           />
         </div>
         <div className="roomGroup">
