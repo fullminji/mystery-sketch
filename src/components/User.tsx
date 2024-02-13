@@ -111,7 +111,8 @@ const User: React.FC<UserProps> = ({
             </li>
           );
         })}
-        {Array.from({ length: Math.max(0, 8 - userInfo.length) }).map(
+        {Array.from(
+          { length: Math.max(0, 8 - userInfo.length) },
           (_, index) => (
             <li key={`empty-${index}`}>
               <span className="users no">NO USER</span>
