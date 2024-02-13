@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import Canvas from '../../components/Canvas';
 import Chat from '../../components/Chat';
-import User, { UserInfo, GameRoomInfo } from '../../components/User';
+import User, { UserInfo } from '../../components/User';
 import Sound from '../../components/Sound';
 import Start from '../../components/Start';
 import Result from '../../components/Result';
@@ -22,7 +22,6 @@ interface settingProps {
 const Room: React.FC = () => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [userInfo, setUserInfo] = useState<UserInfo[]>([]);
-  const [gameRoomInfo, setGameRoomInfo] = useState<GameRoomInfo[]>([]);
   const { roomId } = useParams<{ roomId?: string }>() ?? { roomId: '' };
   const [socket, setSocket] = useState<any>(null);
   const navigate = useNavigate();
@@ -43,7 +42,6 @@ const Room: React.FC = () => {
       }
       const result = await response.json();
       setUserInfo(result.gameRoomInfo.users);
-      setGameRoomInfo(result.gameRoomInfo);
     } catch (error) {
       console.error('Fetch error:', error);
     }
@@ -199,7 +197,6 @@ const Room: React.FC = () => {
   }, [nickName, userInfo]);
 
   // 게임 진행 라운드
-
   const handleIsRound = () => {
     fetch(`${api}/api/gameRoom/currentRound`, {
       method: 'PUT',
@@ -283,11 +280,11 @@ const Room: React.FC = () => {
               </button>
             </div>
           </div>
-          {/* {isAdmin && ( */}
-          <div className="startArea">
-            <Start handleStart={handleStart} />
-          </div>
-          {/* )} */}
+          {isAdmin && (
+            <div className="startArea">
+              <Start handleStart={handleStart} />
+            </div>
+          )}
           <div className="changeArea">
             <Canvas socket={socket} roomId={roomId!} />
           </div>
