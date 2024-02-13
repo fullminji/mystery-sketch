@@ -238,6 +238,10 @@ const Room: React.FC = () => {
     gameEndCheck();
   }, [socket, roomId, timer, isRound, roomSetting?.round, gameEnd]);
 
+  const handlePass = () => {
+    setTimer(0);
+  };
+
   return (
     <div className="page room">
       <div className="roomArea">
@@ -286,7 +290,7 @@ const Room: React.FC = () => {
               </div>
             )}
             <div className="btnArea">
-              <button type="button" className="btn">
+              <button type="button" className="btn" onClick={handlePass}>
                 포기
               </button>
             </div>
