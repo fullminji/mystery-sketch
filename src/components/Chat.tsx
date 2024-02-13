@@ -11,7 +11,10 @@ interface UserProps {
   socket: any;
   roomId: string;
   isRound: number;
-  setIsRound: any;
+  setIsRound: React.Dispatch<React.SetStateAction<number>>;
+  answer: string;
+  isAnswer: boolean;
+  setIsAnswer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Chat: React.FC<UserProps> = ({
@@ -20,6 +23,9 @@ const Chat: React.FC<UserProps> = ({
   roomId,
   isRound,
   setIsRound,
+  answer,
+  isAnswer,
+  setIsAnswer,
 }) => {
   const [message, setMessage] = useState<string>('');
   const username = sessionStorage.getItem('nickName');
@@ -46,6 +52,10 @@ const Chat: React.FC<UserProps> = ({
   const sendMessage = useCallback(() => {
     if (socket && message.trim() !== '') {
       const data = { message, username, roomId };
+      if (answer === message) {
+        socket.emit('answerUser', username);
+        setIsAnswer(true);
+      }
       socket.emit('message', data);
       setMessage('');
     }

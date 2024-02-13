@@ -8,11 +8,6 @@ import Sound from '../../components/Sound';
 import Start from '../../components/Start';
 import Result from '../../components/Result';
 
-interface AnswerObject {
-  id: number;
-  answer: string;
-}
-
 interface settingProps {
   time: number;
   max_players: number;
@@ -29,11 +24,11 @@ const Room: React.FC = () => {
   const nickName = sessionStorage.getItem('nickName');
   const character = sessionStorage.getItem('character');
   const [roomSetting, setRoomSetting] = useState<settingProps>();
-
-  const [isAdmin, setIsAdmin] = useState(false);
-
+  const [isAdmin, setIsAdmin] = useState(true);
   const [gameEnd, setGameEnd] = useState(false);
+  const [isAnswer, setIsAnswer] = useState(false);
 
+  // 유저 목록 불러오기
   const getUser = async () => {
     try {
       const response = await fetch(`${api}/api/gameRoom/${roomId}`);
@@ -59,8 +54,6 @@ const Room: React.FC = () => {
       transports: ['websocket'],
       query: {
         roomId,
-        // users_id:
-        //   userInfo.length > 0 ? userInfo[userInfo.length - 1].users_id : null,
       },
     });
     setSocket(newSocket);
@@ -149,7 +142,7 @@ const Room: React.FC = () => {
     return () => clearInterval(interval);
   }, [socket, start, isRound]);
 
-  // 다음 라운드 진행 시 타이머 리셋
+  // 다음 라운드 진행 시 타이머 리셋 (방장)
   useEffect(() => {
     if (socket && roomSetting && isAdmin && !gameEnd) {
       const isRoundListener = () => {
@@ -185,24 +178,23 @@ const Room: React.FC = () => {
   }, [socket, timer]);
 
   // 단어 불러오기
-  const [answerList, setAnswerList] = useState<AnswerObject[]>([]);
+  const [answer, setAnswer] = useState('');
+
   useEffect(() => {
-    fetch(`${api}/api/answer`, {
+    fetch(`${api}/api/answer/${roomId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
       },
     })
       .then(res => res.json())
-      .then((data: AnswerObject[]) => {
-        setAnswerList(data);
+      .then(data => {
+        setAnswer(data.answer);
       })
       .catch(error => {
         console.error(error);
       });
   }, []);
-
-  const answerValues = answerList.map(item => item.answer);
 
   // 잠금
   const [isLocked, setIsLocked] = useState(false);
@@ -267,25 +259,23 @@ const Room: React.FC = () => {
                 <span className="time">0</span>
               )}
             </div>
-            {answerValues[isRound - 1] && (
+            {answer && (
               <div className="answerArea">
-                {answerValues[isRound - 1]
-                  .split('')
-                  .map((letter, letterIndex) => (
-                    <div
-                      className={
-                        (letterIndex === 0 &&
-                          roomSetting?.time &&
-                          Number(timer) < roomSetting.time / 2) ||
-                        Number(timer) === 0
-                          ? 'answer'
-                          : 'answer hidden'
-                      }
-                      key={letterIndex}
-                    >
-                      {letter}
-                    </div>
-                  ))}
+                {answer.split('').map((letter, letterIndex) => (
+                  <div
+                    className={
+                      (letterIndex === 0 &&
+                        roomSetting?.time &&
+                        Number(timer) < roomSetting.time / 2) ||
+                      Number(timer) === 0
+                        ? 'answer'
+                        : 'answer hidden'
+                    }
+                    key={letterIndex}
+                  >
+                    {letter}
+                  </div>
+                ))}
               </div>
             )}
             <div className="btnArea">
@@ -333,6 +323,9 @@ const Room: React.FC = () => {
               roomId={roomId!}
               isRound={isRound}
               setIsRound={setIsRound}
+              answer={answer}
+              isAnswer={isAnswer}
+              setIsAnswer={setIsAnswer}
             />
           </div>
         </div>

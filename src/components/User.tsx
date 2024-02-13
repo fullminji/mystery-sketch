@@ -66,19 +66,6 @@ const User: React.FC<UserProps> = ({
     console.log('추방유저 ID :', users_id, username);
   };
 
-  // useEffect(() => {
-  //   if (socket) {
-  //     socket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-  //       setUserInfo(updatedUserInfo);
-  //       console.log(updatedUserInfo);
-  //     });
-
-  //     return () => {
-  //       socket.off('userListUpdate');
-  //     };
-  //   }
-  // }, [socket]);
-
   return (
     <div className="user">
       <ul className="userArea">
