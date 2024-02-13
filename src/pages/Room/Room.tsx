@@ -163,8 +163,9 @@ const Room: React.FC = () => {
         socket.off('isRound', isRoundListener);
       };
     }
-  }, [socket, isRound]);
+  }, [socket, roomSetting, isAdmin, gameEnd, isRound, handleIsRound]);
 
+  // 방 설정에 따라 타이머 변경
   useEffect(() => {
     if (roomSetting?.time !== undefined) {
       setTimer(roomSetting.time);
@@ -295,11 +296,11 @@ const Room: React.FC = () => {
               </button>
             </div>
           </div>
-          {/* {isAdmin && ( */}
-          <div className="startArea">
-            <Start handleStart={handleStart} />
-          </div>
-          {/* )} */}
+          {isAdmin && !start && (
+            <div className="startArea">
+              <Start handleStart={handleStart} />
+            </div>
+          )}
           <div className="changeArea">
             <Canvas socket={socket} roomId={roomId!} />
           </div>
