@@ -24,9 +24,10 @@ const Room: React.FC = () => {
   const nickName = sessionStorage.getItem('nickName');
   const character = sessionStorage.getItem('character');
   const [roomSetting, setRoomSetting] = useState<settingProps>();
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [gameEnd, setGameEnd] = useState(false);
   const [isAnswer, setIsAnswer] = useState(false);
+  const [isPencil, setIsPencil] = useState(false);
 
   // 유저 목록 불러오기
   const getUser = async () => {
@@ -82,7 +83,28 @@ const Room: React.FC = () => {
     return () => {
       newSocket.disconnect();
     };
-  }, [roomId]);
+  }, [roomId, api]);
+
+  // 단어 불러오기
+  const [answer, setAnswer] = useState('');
+  const getAnswer = () => {
+    if (isPencil) {
+      fetch(`${api}/api/answer/${roomId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8',
+        },
+      })
+        .then(res => res.json())
+        .then(data => {
+          setAnswer(data.answer);
+          socket.emit('answer', { answer: data.answer, roomId: roomId });
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  };
 
   const [timer, setTimer] = useState(roomSetting?.time ?? 0);
   const [isRound, setIsRound] = useState<number>(1);
@@ -108,6 +130,7 @@ const Room: React.FC = () => {
   const [start, setStart] = useState(false);
 
   const handleStart = () => {
+    getAnswer();
     socket.emit('gameStart');
     handleIsRound();
     setStart(true);
@@ -116,8 +139,7 @@ const Room: React.FC = () => {
   // 타이머 로직
   useEffect(() => {
     let interval: any;
-
-    if (start) {
+    if (start && isAdmin) {
       interval = setInterval(() => {
         setTimer(prevTimer => {
           if (typeof prevTimer === 'number' && roomSetting) {
@@ -142,12 +164,36 @@ const Room: React.FC = () => {
     }
 
     return () => clearInterval(interval);
-  }, [socket, start, isRound]);
+  }, [socket, start, isRound, roomId, roomSetting, isAdmin]);
 
-  // 다음 라운드 진행 시 타이머 리셋 (방장)
+  useEffect(() => {
+    if (isAnswer) {
+      setTimer(0);
+      setIsAnswer(false);
+    }
+  }, [isAnswer]);
+
+  // 해당 라운드 정답 가져오기 (문제 맞추는 사람)
+  useEffect(() => {
+    if (!isPencil && start) {
+      const handleAnswer = ({ answer }: { answer: string }) => {
+        setAnswer(answer);
+      };
+
+      socket.on('answer', handleAnswer);
+
+      return () => {
+        socket.off('answer', handleAnswer);
+      };
+    }
+  }, [socket, isPencil, start]);
+
+  //다음 라운드 진행 시 타이머 리셋 (방장)
   useEffect(() => {
     if (socket && roomSetting && isAdmin && !gameEnd) {
       const isRoundListener = () => {
+        getAnswer();
+        socket.emit('answer', { answer: answer });
         handleIsRound();
       };
       socket.on('isRound', isRoundListener);
@@ -156,7 +202,7 @@ const Room: React.FC = () => {
         socket.off('isRound', isRoundListener);
       };
     }
-  }, [socket, roomSetting, isAdmin, gameEnd, isRound, handleIsRound]);
+  }, [socket, roomSetting, isAdmin, gameEnd, isRound, handleIsRound, answer]);
 
   // 방 설정에 따라 타이머 변경
   useEffect(() => {
@@ -179,25 +225,6 @@ const Room: React.FC = () => {
     }
   }, [socket, timer]);
 
-  // 단어 불러오기
-  const [answer, setAnswer] = useState('');
-
-  useEffect(() => {
-    fetch(`${api}/api/answer/${roomId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8',
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        setAnswer(data.answer);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
-
   // 잠금
   const [isLocked, setIsLocked] = useState(false);
   const toggleLock = () => {
@@ -218,6 +245,7 @@ const Room: React.FC = () => {
     }
   }, [nickName, userInfo]);
 
+  // 게임 종료 확인
   useEffect(() => {
     const gameEndCheck = () => {
       if (isRound === roomSetting?.round && timer === 0) {
@@ -263,29 +291,40 @@ const Room: React.FC = () => {
                 <span className="time">0</span>
               )}
             </div>
-            {answer && (
-              <div className="answerArea">
-                {answer.split('').map((letter, letterIndex) => (
-                  <div
-                    className={
+            {answer &&
+              (isPencil ? (
+                <div className="answerArea">
+                  {answer.split('').map((letter, letterIndex) => (
+                    <div className="answer" key={letterIndex}>
+                      {letter}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="answerArea">
+                  {answer.split('').map((letter, letterIndex) => {
+                    let className =
                       (letterIndex === 0 &&
                         roomSetting?.time &&
                         Number(timer) < roomSetting.time / 2) ||
                       Number(timer) === 0
                         ? 'answer'
-                        : 'answer hidden'
-                    }
-                    key={letterIndex}
-                  >
-                    {letter}
-                  </div>
-                ))}
-              </div>
-            )}
+                        : 'answer hidden';
+                    return (
+                      <div className={className} key={letterIndex}>
+                        {letter}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+
             <div className="btnArea">
-              <button type="button" className="btn" onClick={handlePass}>
-                포기
-              </button>
+              {isPencil && (
+                <button type="button" className="btn" onClick={handlePass}>
+                  포기
+                </button>
+              )}
             </div>
           </div>
           <div className="changeArea">
