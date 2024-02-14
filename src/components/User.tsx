@@ -20,6 +20,8 @@ interface UserProps {
   socket: any;
   roomId: string;
   isRound: any;
+  isAdminUser: boolean;
+  nickName: string | null;
 }
 const User: React.FC<UserProps> = ({
   userInfo,
@@ -27,6 +29,8 @@ const User: React.FC<UserProps> = ({
   setUserInfo,
   roomId,
   isRound,
+  isAdminUser,
+  nickName,
 }) => {
   const navigate = useNavigate();
   const name = sessionStorage.getItem('nickName');
@@ -39,32 +43,35 @@ const User: React.FC<UserProps> = ({
     if (isRound) {
       socket?.emit('pencil', { pencil: isRound, roomId: roomId });
     }
-  }, [isRound, socket]);
+  }, [isRound, socket, roomId]);
 
   // 클라이언트 측에서 유저를 추방하는 로직 추가
-  const handleExpelUser = (users_id: number, username: string) => {
-    const updatedUsers = userInfo.filter(user => user.users_id !== users_id);
-    setUserInfo(updatedUsers);
+  const handleExpelUser = (username: string) => {
     const expulsionMessage = `${username}님이 추방되셨습니다.`;
     // 시스템 메시지를 채팅박스에 추가
     socket.emit('message', {
       message: expulsionMessage,
-      username: '관리자',
       type: 'expel',
     });
 
     // 서버에 추방 정보 전송
-    socket.emit('expelUser', { users_id, roomId });
-
-    socket.on('userExpelled', (expelledUserId: number) => {
-      if (users_id === expelledUserId) {
-        navigate('/');
-        console.log('추방 성공');
-      }
-    });
-
-    console.log('추방유저 ID :', users_id, username);
+    socket.emit('expelUser', { username: username });
   };
+
+  useEffect(() => {
+    if (socket) {
+      const handleExpelUser = ({ username }: { username: string }) => {
+        if (nickName === username) {
+          navigate('/');
+          console.log('추방 성공');
+        }
+      };
+      socket.on('expelUser', handleExpelUser);
+      return () => {
+        socket.off('expelUser', handleExpelUser);
+      };
+    }
+  }, [socket, nickName, navigate]);
 
   return (
     <div className="user">
@@ -88,11 +95,11 @@ const User: React.FC<UserProps> = ({
                   <img src={image_link} alt="캐릭터" />
                 </div>
               </div>
-              {isAdmin !== 1 && (
+              {isAdminUser && (
                 <button
                   className={`${isAdmin !== 1 ? 'btn close' : ''}`}
                   type="button"
-                  onClick={() => handleExpelUser(users_id, username)}
+                  onClick={() => handleExpelUser(username)}
                 />
               )}
             </li>

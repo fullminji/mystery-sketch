@@ -62,6 +62,7 @@ const Room: React.FC = () => {
     newSocket.on('roomSetting', (setting: any) => {
       setRoomSetting(setting[0]);
     });
+    newSocket.emit('setUserInfo', { userNickname: nickName });
 
     // 사용자 목록 업데이트
     newSocket.emit('newUserJoined', { roomId: Number(roomId) });
@@ -248,6 +249,8 @@ const Room: React.FC = () => {
               setUserInfo as React.Dispatch<React.SetStateAction<UserInfo[]>>
             }
             isRound={isRound}
+            isAdminUser={isAdmin}
+            nickName={nickName}
           />
         </div>
         <div className="roomGroup">
