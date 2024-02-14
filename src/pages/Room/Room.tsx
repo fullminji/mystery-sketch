@@ -284,12 +284,12 @@ const Room: React.FC = () => {
               </button>
             </div>
           </div>
-          {isAdmin && !start && (
-            <div className="startArea">
-              <Start handleStart={handleStart} />
-            </div>
-          )}
           <div className="changeArea">
+            {isAdmin && !start && (
+              <div className="startArea">
+                <Start handleStart={handleStart} />
+              </div>
+            )}
             <Canvas socket={socket} roomId={roomId!} />
           </div>
         </div>
