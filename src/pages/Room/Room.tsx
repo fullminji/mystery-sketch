@@ -71,10 +71,11 @@ const Room: React.FC = () => {
       console.log('User list updated 성공:', updatedUserInfo);
       getUser();
     });
+
     // 연결 해제 시 처리
     newSocket.on('disconnect', () => {
-      // navigate('/');
-      // sessionStorage.clear();
+      navigate('/');
+      sessionStorage.clear();
       console.log('소켓이 연결 해제되었습니다.');
     });
 
