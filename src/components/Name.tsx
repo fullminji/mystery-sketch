@@ -61,7 +61,7 @@ const Name = () => {
   };
 
   const handleStart = () => {
-    const isValidName = /^[a-zA-Z0-9가-힣]{1,10}$/.test(name);
+    const isValidName = /^[a-zA-Z0-9가-힣ㄱ-ㅎ]{1,10}$/.test(name);
 
     if (name.length === 0) {
       return alert('이름을 입력해주세요.');
