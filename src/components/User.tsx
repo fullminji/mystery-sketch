@@ -36,10 +36,6 @@ const User: React.FC<UserProps> = ({
   const name = sessionStorage.getItem('nickName');
 
   useEffect(() => {
-    console.log('userInfo updated:', userInfo);
-  }, [userInfo, userInfo.length]);
-
-  useEffect(() => {
     if (isRound) {
       socket?.emit('pencil', { pencil: isRound, roomId: roomId });
     }

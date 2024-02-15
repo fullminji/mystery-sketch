@@ -13,19 +13,16 @@ interface UserProps {
   isRound: number;
   setIsRound: React.Dispatch<React.SetStateAction<number>>;
   answer: string;
-  isAnswer: boolean;
-  setIsAnswer: React.Dispatch<React.SetStateAction<boolean>>;
+  isPencil: boolean;
 }
 
 const Chat: React.FC<UserProps> = ({
-  userInfo,
   socket,
   roomId,
   isRound,
   setIsRound,
   answer,
-  isAnswer,
-  setIsAnswer,
+  isPencil,
 }) => {
   const [message, setMessage] = useState<string>('');
   const username = sessionStorage.getItem('nickName');
@@ -47,25 +44,28 @@ const Chat: React.FC<UserProps> = ({
         socket.off('message', messageHandler);
       };
     }
-  }, [socket, messageHandler]);
+  }, [socket, messageHandler, setIsRound]);
 
   const sendMessage = useCallback(() => {
     if (socket && message.trim() !== '') {
       const data = { message, username, roomId };
-      if (answer === message) {
-        socket.emit('answerUser', username);
-        setIsAnswer(true);
-      }
       socket.emit('message', data);
+      if (answer && message === answer && !isPencil) {
+        const answerMessage = '정답';
+        socket.emit('message', { message: answerMessage });
+        socket.emit('point', { username: username, roomId: roomId });
+      }
       setMessage('');
     }
-  }, [socket, message, username]);
+  }, [socket, message, username, roomId, answer, isPencil]);
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
-      if (message.trim() !== '') {
-        sendMessage();
+      if (!e.shiftKey) {
+        if (message.trim() !== '') {
+          sendMessage();
+        }
+        e.preventDefault();
       }
     }
   };
