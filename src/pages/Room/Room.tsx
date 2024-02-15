@@ -175,7 +175,7 @@ const Room: React.FC = () => {
 
   // 해당 라운드 정답 가져오기 (문제 맞추는 사람)
   useEffect(() => {
-    if (!isPencil && start) {
+    if (socket && !isPencil) {
       const handleAnswer = ({ answer }: { answer: string }) => {
         setAnswer(answer);
       };
