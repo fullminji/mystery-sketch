@@ -30,7 +30,7 @@ const Room: React.FC = () => {
   const [isPencil, setIsPencil] = useState(false);
 
   // 유저 목록 불러오기
-  const getUser = async () => {
+  const getUser = useCallback(async () => {
     try {
       const response = await fetch(`${api}/api/gameRoom/${roomId}`);
       if (!response.ok) {
@@ -41,7 +41,7 @@ const Room: React.FC = () => {
     } catch (error) {
       console.error('Fetch error:', error);
     }
-  };
+  }, [api, roomId]);
 
   useEffect(() => {
     if (!nickName || !character) {
@@ -67,27 +67,25 @@ const Room: React.FC = () => {
 
     // 사용자 목록 업데이트
     newSocket.emit('newUserJoined', { roomId: Number(roomId) });
-    newSocket.on('userListUpdate', (updatedUserInfo: UserInfo[]) => {
-      setUserInfo(updatedUserInfo);
-      console.log('User list updated 성공:', updatedUserInfo);
+    newSocket.on('userListUpdate', () => {
       getUser();
     });
 
     // 연결 해제 시 처리
     newSocket.on('disconnect', () => {
+      console.log('소켓이 연결 해제되었습니다.');
       navigate('/');
       sessionStorage.clear();
-      console.log('소켓이 연결 해제되었습니다.');
     });
 
     return () => {
       newSocket.disconnect();
     };
-  }, [roomId, api]);
+  }, [roomId, api, character, navigate, nickName, getUser]);
 
   // 단어 불러오기
   const [answer, setAnswer] = useState('');
-  const getAnswer = () => {
+  const getAnswer = useCallback(() => {
     if (isPencil) {
       fetch(`${api}/api/answer/${roomId}`, {
         method: 'GET',
@@ -104,7 +102,7 @@ const Room: React.FC = () => {
           console.error(error);
         });
     }
-  };
+  }, [isPencil, api, roomId, socket]);
 
   const [timer, setTimer] = useState(roomSetting?.time ?? 0);
   const [isRound, setIsRound] = useState<number>(1);
@@ -167,15 +165,29 @@ const Room: React.FC = () => {
   }, [socket, start, isRound, roomId, roomSetting, isAdmin]);
 
   useEffect(() => {
-    if (isAnswer) {
+    const handleMessage = () => {
+      setIsAnswer(true);
+    };
+
+    if (socket) {
+      socket.on('nextRound', handleMessage);
+
+      return () => {
+        socket.off('nextRound', handleMessage);
+      };
+    }
+  }, [socket, setIsAnswer]);
+
+  useEffect(() => {
+    if (isAdmin && isAnswer) {
       setTimer(0);
       setIsAnswer(false);
     }
-  }, [isAnswer]);
+  }, [isAdmin, isAnswer, setTimer, setIsAnswer]);
 
   // 해당 라운드 정답 가져오기 (문제 맞추는 사람)
   useEffect(() => {
-    if (!isPencil && start) {
+    if (socket && !isPencil) {
       const handleAnswer = ({ answer }: { answer: string }) => {
         setAnswer(answer);
       };
@@ -193,7 +205,6 @@ const Room: React.FC = () => {
     if (socket && roomSetting && isAdmin && !gameEnd) {
       const isRoundListener = () => {
         getAnswer();
-        socket.emit('answer', { answer: answer });
         handleIsRound();
       };
       socket.on('isRound', isRoundListener);
@@ -202,7 +213,7 @@ const Room: React.FC = () => {
         socket.off('isRound', isRoundListener);
       };
     }
-  }, [socket, roomSetting, isAdmin, gameEnd, isRound, handleIsRound, answer]);
+  }, [socket, gameEnd, roomSetting, isAdmin, getAnswer, handleIsRound]);
 
   // 방 설정에 따라 타이머 변경
   useEffect(() => {
@@ -253,7 +264,7 @@ const Room: React.FC = () => {
         setStart(false);
         setGameEnd(true);
       }
-      console.log(isRound, roomSetting?.round);
+      // console.log(isRound, roomSetting?.round);
     };
 
     gameEndCheck();
@@ -367,8 +378,7 @@ const Room: React.FC = () => {
               isRound={isRound}
               setIsRound={setIsRound}
               answer={answer}
-              isAnswer={isAnswer}
-              setIsAnswer={setIsAnswer}
+              isPencil={isPencil}
             />
           </div>
         </div>
