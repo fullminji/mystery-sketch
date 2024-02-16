@@ -303,7 +303,18 @@ const Room: React.FC = () => {
           console.error(error);
         });
     }
-  }, [start, isRound, roomId, api]);
+  }, [isRound, start]);
+
+  useEffect(() => {
+    const pencilUser = userInfo.find(user => user.pencilAdmin === 1);
+    if (pencilUser?.username === nickName) {
+      setIsPencil(true);
+    } else {
+      setIsPencil(false);
+    }
+  }, [nickName, userInfo]);
+
+  console.log(isPencil);
 
   return (
     <div className="page room">
