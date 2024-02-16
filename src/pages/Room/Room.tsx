@@ -376,7 +376,7 @@ const Room: React.FC = () => {
                 <Start handleStart={handleStart} />
               </div>
             )}
-            <Canvas socket={socket} roomId={roomId!} />
+            <Canvas socket={socket} roomId={roomId!} isPencil={isPencil} />
           </div>
         </div>
         <div className="roomGroup">

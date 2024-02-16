@@ -3,9 +3,10 @@ import React, { useRef, useState, useEffect } from 'react';
 interface CanvasProps {
   socket: any;
   roomId: string;
+  isPencil: boolean;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
+const Canvas: React.FC<CanvasProps> = ({ socket, roomId, isPencil }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [painting, setPainting] = useState(false);
@@ -166,60 +167,87 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId }) => {
     }
   };
 
+  // 그리기 기능 활성화 조건 추가
+  const handleMouseMove = (
+    e: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
+  ) => {
+    if (!isPencil) return;
+    drawFn(e);
+  };
+
+  const handleMouseDown = () => {
+    if (!isPencil) return;
+    setPainting(true);
+  };
+
+  const handleMouseUp = () => {
+    if (!isPencil) return;
+    setPainting(false);
+  };
+
+  const handleMouseLeave = () => {
+    if (!isPencil) return;
+    setPainting(false);
+  };
+
   return (
     <div className="canvasArea">
       <canvas
         ref={canvasRef}
-        onMouseMove={e => drawFn(e)}
-        onMouseDown={() => setPainting(true)}
-        onMouseUp={() => setPainting(false)}
-        onMouseLeave={() => setPainting(false)}
+        onMouseMove={handleMouseMove}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
       />
-      <ul className="colorArea">
-        {COLOR_DATA.map(color => (
-          <li className="color" key={color.id}>
+      {isPencil ? (
+        <ul className="colorArea">
+          {COLOR_DATA.map(color => (
+            <li className="color" key={color.id}>
+              <input
+                type="radio"
+                id={`color${color.id}`}
+                name="colorGroup"
+                className="formRadio"
+                onChange={() => handleColorChange(color.color)}
+              />
+              <label htmlFor={`color${color.id}`} className="formLabel">
+                <span>{color.name}</span>
+              </label>
+            </li>
+          ))}
+          <li className="draw">
             <input
               type="radio"
-              id={`color${color.id}`}
-              name="colorGroup"
+              id="draw1"
+              name="drawGroup"
               className="formRadio"
-              onChange={() => handleColorChange(color.color)}
+              onChange={drawFn}
             />
-            <label htmlFor={`color${color.id}`} className="formLabel">
-              <span>{color.name}</span>
+            <label htmlFor="draw1" className="formLabel">
+              <span>연필</span>
             </label>
           </li>
-        ))}
-        <li className="draw">
-          <input
-            type="radio"
-            id="draw1"
-            name="drawGroup"
-            className="formRadio"
-            onChange={drawFn}
-          />
-          <label htmlFor="draw1" className="formLabel">
-            <span>연필</span>
-          </label>
-        </li>
-        <li className="draw">
-          <input
-            type="radio"
-            id="draw2"
-            name="drawGroup"
-            className="formRadio"
-            onChange={eraserFn}
-          />
-          <label htmlFor="draw2" className="formLabel">
-            <span>지우개</span>
-          </label>
-        </li>
-        <li className="draw">
-          <button type="button" className="btn" onClick={clearCanvas}>
-            <span>전체 지우기</span>
-          </button>
-        </li>
-      </ul>
+          <li className="draw">
+            <input
+              type="radio"
+              id="draw2"
+              name="drawGroup"
+              className="formRadio"
+              onChange={eraserFn}
+            />
+            <label htmlFor="draw2" className="formLabel">
+              <span>지우개</span>
+            </label>
+          </li>
+          <li className="draw">
+            <button type="button" className="btn" onClick={clearCanvas}>
+              <span>전체 지우기</span>
+            </button>
+          </li>
+        </ul>
+      ) : (
+        <div className="colorArea" />
+      )}
     </div>
   );
 };
