@@ -1,53 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import close from '../style/images/icon/close.png';
+import { UserInfo } from './User';
 
-const Result = () => {
-  const resultData = [
-    {
-      rank: 1,
-      userName: '유저1등',
-      point: 1000,
-    },
-    {
-      rank: 2,
-      userName: '유저11',
-      point: 900,
-    },
-    {
-      rank: 3,
-      userName: '유저이름일이삼사오',
-      point: 800,
-    },
-    {
-      rank: 4,
-      userName: '유저test',
-      point: 710,
-    },
-    {
-      rank: 5,
-      userName: '유저test02',
-      point: 210,
-    },
-    {
-      rank: 6,
-      userName: '유저test03',
-      point: 10,
-    },
-    {
-      rank: 7,
-      userName: '유저test04',
-      point: 1,
-    },
-    {
-      rank: 8,
-      userName: '유저test05',
-      point: 0,
-    },
-  ];
+const Result = ({ userInfo }: { userInfo: UserInfo[] }) => {
+  const [rank, setRank] = useState(userInfo);
 
   const [isToggled, setIsToggled] = useState<boolean>(true);
   const selectRef = useRef<HTMLDivElement>(null);
-  const winner = resultData[0].userName;
+
+  useEffect(() => {
+    if (isToggled) {
+      const rankData = [...userInfo].sort((a, b) => b.score - a.score);
+      setRank(rankData);
+    }
+  }, [userInfo, isToggled]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -76,14 +42,14 @@ const Result = () => {
             </div>
             <div className="resultContainer">
               <h2>SCORE</h2>
-              <h3>{winner}님이 방장이 되었습니다!</h3>
+              <h3>{rank[0]?.username}님이 우승자가 되었습니다!</h3>
               <div className="rankResultGroup">
                 <ul className="rankResult">
-                  {resultData.map((user, index) => (
+                  {rank.map((rankData, index) => (
                     <li key={index}>
-                      <span className="rank">{user.rank}등</span>
-                      <span className="name">{user.userName}</span>
-                      <span className="point">{user.point}P</span>
+                      <span className="rank">{index + 1}등</span>
+                      <span className="name">{rankData.username}</span>
+                      <span className="point">{rankData.score}P</span>
                     </li>
                   ))}
                 </ul>

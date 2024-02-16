@@ -382,7 +382,7 @@ const Room: React.FC = () => {
             />
           </div>
         </div>
-        {gameEnd && <Result />}
+        {gameEnd && <Result userInfo={userInfo} />}
       </div>
     </div>
   );
