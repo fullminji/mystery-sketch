@@ -102,12 +102,12 @@ const Room: React.FC = () => {
           console.error(error);
         });
     }
-  }, [isPencil, api, roomId, socket]);
+  }, [isPencil]);
 
   const [timer, setTimer] = useState(roomSetting?.time ?? 0);
   const [isRound, setIsRound] = useState<number>(1);
 
-  // 게임 진행 라운드
+  // 현재 진행 라운드 전달
   const handleIsRound = useCallback(() => {
     fetch(`${api}/api/gameRoom/currentRound`, {
       method: 'PUT',
@@ -127,6 +127,7 @@ const Room: React.FC = () => {
 
   const [start, setStart] = useState(false);
 
+  // 게임 시작 (방장)
   const handleStart = () => {
     getAnswer();
     socket.emit('gameStart');
@@ -134,14 +135,15 @@ const Room: React.FC = () => {
     setStart(true);
   };
 
-  // 타이머 로직
+  // 타이머 로직 (연필)
   useEffect(() => {
     let interval: any;
-    if (start && isAdmin) {
+    if (start && isPencil) {
       interval = setInterval(() => {
         setTimer(prevTimer => {
           if (typeof prevTimer === 'number' && roomSetting) {
             const newTimer = prevTimer - 1;
+            // 타이머 종료시 시간 리셋
             if (newTimer < 0) {
               clearInterval(interval);
               socket.emit('isRound', {
@@ -162,8 +164,9 @@ const Room: React.FC = () => {
     }
 
     return () => clearInterval(interval);
-  }, [socket, start, isRound, roomId, roomSetting, isAdmin]);
+  }, [socket, start, isRound, roomId, isPencil]);
 
+  // 정답시 다음 라운드 진행
   useEffect(() => {
     const handleMessage = () => {
       setIsAnswer(true);
@@ -178,12 +181,13 @@ const Room: React.FC = () => {
     }
   }, [socket, setIsAnswer]);
 
+  // 정답시 타이머 정지 (연필)
   useEffect(() => {
-    if (isAdmin && isAnswer) {
+    if (isPencil && isAnswer) {
       setTimer(0);
       setIsAnswer(false);
     }
-  }, [isAdmin, isAnswer, setTimer, setIsAnswer]);
+  }, [isPencil, isAnswer, setTimer, setIsAnswer]);
 
   // 해당 라운드 정답 가져오기 (문제 맞추는 사람)
   useEffect(() => {
@@ -200,9 +204,9 @@ const Room: React.FC = () => {
     }
   }, [socket, isPencil, start]);
 
-  //다음 라운드 진행 시 타이머 리셋 (방장)
+  //다음 라운드 진행 (연필)
   useEffect(() => {
-    if (socket && roomSetting && isAdmin && !gameEnd) {
+    if (socket && roomSetting && isPencil && !gameEnd) {
       const isRoundListener = () => {
         getAnswer();
         handleIsRound();
@@ -213,7 +217,7 @@ const Room: React.FC = () => {
         socket.off('isRound', isRoundListener);
       };
     }
-  }, [socket, gameEnd, roomSetting, isAdmin, getAnswer, handleIsRound]);
+  }, [socket, gameEnd, roomSetting, isPencil, handleIsRound]);
 
   // 방 설정에 따라 타이머 변경
   useEffect(() => {
@@ -259,8 +263,10 @@ const Room: React.FC = () => {
   // 연필 구별
   useEffect(() => {
     const pencilUser = userInfo.find(user => user.pencilAdmin === 1);
-    if (pencilUser && pencilUser.username === nickName) {
+    if (pencilUser?.username === nickName) {
       setIsPencil(true);
+    } else {
+      setIsPencil(false);
     }
   }, [nickName, userInfo]);
 
@@ -278,11 +284,14 @@ const Room: React.FC = () => {
     gameEndCheck();
   }, [socket, roomId, timer, isRound, roomSetting?.round, gameEnd]);
 
+  // 기권 (연필)
   const handlePass = () => {
-    setTimer(0);
+    if (isPencil) {
+      setTimer(0);
+    }
   };
 
-  // 그리기 권한
+  // 그리기 권한 업데이트
   useEffect(() => {
     if (isRound && start) {
       fetch(`${api}/api/gameroom/${roomId}`, {
@@ -304,17 +313,6 @@ const Room: React.FC = () => {
         });
     }
   }, [isRound, start]);
-
-  useEffect(() => {
-    const pencilUser = userInfo.find(user => user.pencilAdmin === 1);
-    if (pencilUser?.username === nickName) {
-      setIsPencil(true);
-    } else {
-      setIsPencil(false);
-    }
-  }, [nickName, userInfo]);
-
-  console.log(isPencil);
 
   return (
     <div className="page room">
