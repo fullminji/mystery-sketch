@@ -8,6 +8,7 @@ export interface UserInfo {
   users_id: number;
   image_link: string;
   roomId: string;
+  pencilAdmin: number;
 }
 
 export interface GameRoomInfo {
@@ -21,6 +22,7 @@ interface UserProps {
   roomId: string;
   isRound: any;
   isAdminUser: boolean;
+  isPencilUser: boolean;
   nickName: string | null;
 }
 const User: React.FC<UserProps> = ({
@@ -30,16 +32,15 @@ const User: React.FC<UserProps> = ({
   roomId,
   isRound,
   isAdminUser,
+  isPencilUser,
   nickName,
 }) => {
   const navigate = useNavigate();
   const name = sessionStorage.getItem('nickName');
 
   useEffect(() => {
-    if (isRound) {
-      socket?.emit('pencil', { pencil: isRound, roomId: roomId });
-    }
-  }, [isRound, socket, roomId]);
+    console.log('userInfo updated:', userInfo);
+  }, [userInfo, userInfo.length]);
 
   // 클라이언트 측에서 유저를 추방하는 로직 추가
   const handleExpelUser = (username: string) => {
@@ -72,8 +73,15 @@ const User: React.FC<UserProps> = ({
   return (
     <div className="user">
       <ul className="userArea">
-        {userInfo.map((user, index) => {
-          const { score, isAdmin, username, users_id, image_link } = user;
+        {userInfo.map(user => {
+          const {
+            score,
+            isAdmin,
+            username,
+            users_id,
+            image_link,
+            pencilAdmin,
+          } = user;
           return (
             <li key={users_id}>
               <div className="users">
@@ -84,7 +92,7 @@ const User: React.FC<UserProps> = ({
                   <span className="point">{score} POINT</span>
                 </div>
                 <div
-                  className={`char${index === isRound - 1 ? ' pencil' : ''}${
+                  className={`char${pencilAdmin === 1 ? ' pencil' : ''}${
                     isAdmin === 1 ? ' crown' : ''
                   }`}
                 >

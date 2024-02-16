@@ -274,6 +274,29 @@ const Room: React.FC = () => {
     setTimer(0);
   };
 
+  // 그리기 권한
+  useEffect(() => {
+    fetch(`${api}/api/gameroom/${roomId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify({
+        roomId: roomId,
+        isRound: isRound,
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        setIsPencil(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+
+    setIsPencil(true);
+  }, [isRound, roomId, api]);
+
   return (
     <div className="page room">
       <div className="roomArea">
@@ -291,6 +314,7 @@ const Room: React.FC = () => {
             isRound={isRound}
             isAdminUser={isAdmin}
             nickName={nickName}
+            isPencilUser={isPencil}
           />
         </div>
         <div className="roomGroup">
