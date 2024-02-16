@@ -256,6 +256,14 @@ const Room: React.FC = () => {
     }
   }, [nickName, userInfo]);
 
+  // 연필 구별
+  useEffect(() => {
+    const pencilUser = userInfo.find(user => user.pencilAdmin === 1);
+    if (pencilUser && pencilUser.username === nickName) {
+      setIsPencil(true);
+    }
+  }, [nickName, userInfo]);
+
   // 게임 종료 확인
   useEffect(() => {
     const gameEndCheck = () => {
@@ -276,26 +284,26 @@ const Room: React.FC = () => {
 
   // 그리기 권한
   useEffect(() => {
-    fetch(`${api}/api/gameroom/${roomId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8',
-      },
-      body: JSON.stringify({
-        roomId: roomId,
-        isRound: isRound,
-      }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        setIsPencil(data);
+    if (isRound && start) {
+      fetch(`${api}/api/gameroom/${roomId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8',
+        },
+        body: JSON.stringify({
+          roomId: roomId,
+          isRound: isRound,
+        }),
       })
-      .catch(error => {
-        console.error(error);
-      });
-
-    setIsPencil(true);
-  }, [isRound, roomId, api]);
+        .then(res => res.json())
+        .then(data => {
+          setUserInfo(data.gameRoomInfo.users);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  }, [start, isRound, roomId, api]);
 
   return (
     <div className="page room">

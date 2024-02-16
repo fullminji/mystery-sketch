@@ -38,10 +38,6 @@ const User: React.FC<UserProps> = ({
   const navigate = useNavigate();
   const name = sessionStorage.getItem('nickName');
 
-  useEffect(() => {
-    console.log('userInfo updated:', userInfo);
-  }, [userInfo, userInfo.length]);
-
   // 클라이언트 측에서 유저를 추방하는 로직 추가
   const handleExpelUser = (username: string) => {
     const expulsionMessage = `${username}님이 추방되셨습니다.`;
