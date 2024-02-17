@@ -10,7 +10,7 @@ type characterProps = {
   image_link: string;
 };
 
-const Name = () => {
+const Name = ({ type }: { type: string }) => {
   const api = process.env.REACT_APP_PUBLIC_SERVER_URI;
   const [isToggled, setIsToggled] = useState<boolean>(false);
   const [character, setCharacter] = useState<characterProps[]>([]);
@@ -173,9 +173,11 @@ const Name = () => {
           <button className="startBtn" onClick={handleStart}>
             START
           </button>
-          <button className="createBtn" onClick={handleCreate}>
-            CREATE
-          </button>
+          {type !== 'linkMain' && (
+            <button className="createBtn" onClick={handleCreate}>
+              CREATE
+            </button>
+          )}
         </div>
       </div>
     </div>
