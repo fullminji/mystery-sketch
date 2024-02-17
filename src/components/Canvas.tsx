@@ -4,9 +4,15 @@ interface CanvasProps {
   socket: any;
   roomId: string;
   isPencil: boolean;
+  isRound: number;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ socket, roomId, isPencil }) => {
+const Canvas: React.FC<CanvasProps> = ({
+  socket,
+  roomId,
+  isPencil,
+  isRound,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [painting, setPainting] = useState(false);
@@ -52,9 +58,9 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId, isPencil }) => {
         handleEraser(data);
       });
 
-      // socket.on('clear', () => {
-      //   // clearCanvas();
-      // });
+      socket.on('clear', () => {
+        clearCanvas();
+      });
     }
 
     return () => {
@@ -62,7 +68,7 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId, isPencil }) => {
         socket.off('draw');
         socket.off('color');
         socket.off('eraser');
-        // socket.off('clear');
+        socket.off('clear');
       }
     };
   }, [socket, ctx]);
@@ -111,6 +117,19 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId, isPencil }) => {
     }
   };
 
+  // 실시간 캔버스
+  const drawOnCanvas = (data: any) => {
+    const canvas = canvasRef.current;
+    if (canvas && ctx) {
+      ctx.strokeStyle = data.color;
+      ctx.lineTo(data.x, data.y);
+      ctx.stroke();
+    } else {
+      ctx?.beginPath();
+      ctx?.moveTo(data.x, data.y);
+    }
+  };
+
   // 지우개
   const eraserFn = (e: DrawEvent) => {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
@@ -130,6 +149,7 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId, isPencil }) => {
     }
   };
 
+  // 실시간 지우개
   const handleEraser = (data: any) => {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
     const context = canvas?.getContext('2d');
@@ -155,17 +175,10 @@ const Canvas: React.FC<CanvasProps> = ({ socket, roomId, isPencil }) => {
     setPainting(false);
   };
 
-  const drawOnCanvas = (data: any) => {
-    const canvas = canvasRef.current;
-    if (canvas && ctx) {
-      ctx.strokeStyle = data.color;
-      ctx.lineTo(data.x, data.y);
-      ctx.stroke();
-    } else {
-      ctx?.beginPath();
-      ctx?.moveTo(data.x, data.y);
-    }
-  };
+  // 라운드 바뀔 때마다 캔버스 초기화
+  useEffect(() => {
+    clearCanvas();
+  }, [isRound]);
 
   // 그리기 기능 활성화 조건 추가
   const handleMouseMove = (
