@@ -129,7 +129,7 @@ const Room: React.FC = () => {
 
   // 게임 시작 (방장)
   const handleStart = () => {
-    socket.emit('pencil', isRound);
+    socket.emit('pencil', { isRound: isRound, roomId: roomId });
     getAnswer();
     socket.emit('gameStart');
     handleIsRound();
@@ -151,7 +151,7 @@ const Room: React.FC = () => {
                 isRound: isRound,
                 roomId: Number(roomId),
               });
-              socket.emit('pencil', isRound + 1);
+              socket.emit('pencil', { isRound: isRound + 1, roomId: roomId });
               return roomSetting?.time;
             }
             socket?.emit('remainTimer', {
