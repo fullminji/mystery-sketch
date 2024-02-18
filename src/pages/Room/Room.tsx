@@ -129,6 +129,7 @@ const Room: React.FC = () => {
 
   // 게임 시작 (방장)
   const handleStart = () => {
+    socket.emit('pencil', isRound);
     getAnswer();
     socket.emit('gameStart');
     handleIsRound();
@@ -150,6 +151,7 @@ const Room: React.FC = () => {
                 isRound: isRound,
                 roomId: Number(roomId),
               });
+              socket.emit('pencil', isRound + 1);
               return roomSetting?.time;
             }
             socket?.emit('remainTimer', {
@@ -277,6 +279,7 @@ const Room: React.FC = () => {
         socket?.emit('gameEnd', { roomId: roomId });
         setStart(false);
         setGameEnd(true);
+        setAnswer('');
       }
       // console.log(isRound, roomSetting?.round);
     };
@@ -290,29 +293,6 @@ const Room: React.FC = () => {
       setTimer(0);
     }
   };
-
-  // 그리기 권한 업데이트
-  useEffect(() => {
-    if (isRound && start) {
-      fetch(`${api}/api/gameroom/${roomId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify({
-          roomId: roomId,
-          isRound: isRound,
-        }),
-      })
-        .then(res => res.json())
-        .then(data => {
-          setUserInfo(data.gameRoomInfo.users);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    }
-  }, [isRound, start]);
 
   return (
     <div className="page room">
