@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import Canvas from '../../components/Canvas';
@@ -24,10 +24,11 @@ const Room: React.FC = () => {
   const nickName = sessionStorage.getItem('nickName');
   const character = sessionStorage.getItem('character');
   const [roomSetting, setRoomSetting] = useState<settingProps>();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(true);
   const [gameEnd, setGameEnd] = useState(false);
   const [isAnswer, setIsAnswer] = useState(false);
   const [isPencil, setIsPencil] = useState(false);
+  const [count, setCount] = useState(0);
 
   // 유저 목록 불러오기
   const getUser = useCallback(async () => {
@@ -86,72 +87,53 @@ const Room: React.FC = () => {
   // 단어 불러오기
   const [answer, setAnswer] = useState('');
   const getAnswer = useCallback(() => {
-    if (isPencil) {
-      fetch(`${api}/api/answer/${roomId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-      })
-        .then(res => res.json())
-        .then(data => {
-          setAnswer(data.answer);
-          socket.emit('answer', { answer: data.answer, roomId: roomId });
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    }
-  }, [isPencil]);
-
-  const [timer, setTimer] = useState(roomSetting?.time ?? 0);
-  const [isRound, setIsRound] = useState<number>(1);
-
-  // 현재 진행 라운드 전달
-  const handleIsRound = useCallback(() => {
-    fetch(`${api}/api/gameRoom/currentRound`, {
-      method: 'PUT',
+    fetch(`${api}/api/answer/${roomId}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json;charset=utf-8',
       },
-      body: JSON.stringify({
-        roomId: roomId,
-        isRound: isRound,
-      }),
     })
       .then(res => res.json())
+      .then(data => {
+        setAnswer(data.answer);
+        socket.emit('answer', { answer: data.answer, roomId: roomId });
+      })
       .catch(error => {
         console.error(error);
       });
-  }, [api, roomId, isRound]);
+  }, [api, roomId, setAnswer, socket]);
+
+  const [timer, setTimer] = useState(roomSetting?.time ?? 0);
+  const [isRound, setIsRound] = useState<number>(1);
 
   const [start, setStart] = useState(false);
 
   // 게임 시작 (방장)
   const handleStart = () => {
     socket.emit('pencil', { isRound: isRound, roomId: roomId });
-    getAnswer();
     socket.emit('gameStart');
-    handleIsRound();
     setStart(true);
+    getAnswer();
   };
 
+  const interval = useRef<any>(null);
   // 타이머 로직 (연필)
   useEffect(() => {
-    let interval: any;
     if (start && isPencil) {
-      interval = setInterval(() => {
+      socket.emit('pencil', { isRound: isRound, roomId: roomId });
+
+      interval.current = setInterval(() => {
         setTimer(prevTimer => {
           if (typeof prevTimer === 'number' && roomSetting) {
             const newTimer = prevTimer - 1;
             // 타이머 종료시 시간 리셋
-            if (newTimer < 0) {
-              clearInterval(interval);
+            if (newTimer <= 0) {
+              clearInterval(interval.current);
               socket.emit('isRound', {
                 isRound: isRound,
                 roomId: Number(roomId),
               });
-              socket.emit('pencil', { isRound: isRound + 1, roomId: roomId });
+              setIsPencil(false);
               return roomSetting?.time;
             }
             socket?.emit('remainTimer', {
@@ -165,8 +147,8 @@ const Room: React.FC = () => {
       }, 1000);
     }
 
-    return () => clearInterval(interval);
-  }, [socket, start, isRound, roomId, isPencil]);
+    return () => clearInterval(interval.current);
+  }, [socket, start, isRound, isPencil, roomSetting, roomId]);
 
   // 정답시 다음 라운드 진행
   useEffect(() => {
@@ -211,7 +193,6 @@ const Room: React.FC = () => {
     if (socket && roomSetting && isPencil && !gameEnd) {
       const isRoundListener = () => {
         getAnswer();
-        handleIsRound();
       };
       socket.on('isRound', isRoundListener);
 
@@ -219,7 +200,7 @@ const Room: React.FC = () => {
         socket.off('isRound', isRoundListener);
       };
     }
-  }, [socket, gameEnd, roomSetting, isPencil, handleIsRound]);
+  }, [socket, gameEnd, roomSetting, isPencil, getAnswer]);
 
   // 방 설정에 따라 타이머 변경
   useEffect(() => {
@@ -232,7 +213,7 @@ const Room: React.FC = () => {
   useEffect(() => {
     if (socket) {
       const handleUpdateTimer = (timerValue: number) => {
-        setTimer(timerValue);
+        setCount(timerValue);
       };
       socket.on('updateTimer', handleUpdateTimer);
 
@@ -240,7 +221,7 @@ const Room: React.FC = () => {
         socket.off('updateTimer', handleUpdateTimer);
       };
     }
-  }, [socket, timer]);
+  }, [socket, count]);
 
   // 잠금
   const [isLocked, setIsLocked] = useState(false);
@@ -317,8 +298,8 @@ const Room: React.FC = () => {
         <div className="roomGroup">
           <div className="quizArea">
             <div className="timeArea">
-              {timer ? (
-                <span className="time">{String(timer)}</span>
+              {count ? (
+                <span className="time">{String(count)}</span>
               ) : (
                 <span className="time">0</span>
               )}
