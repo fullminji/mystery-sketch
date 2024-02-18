@@ -116,12 +116,10 @@ const Room: React.FC = () => {
     getAnswer();
   };
 
+  // 타이머 함수
   const interval = useRef<any>(null);
-  // 타이머 로직 (연필)
-  useEffect(() => {
+  const countDown = useCallback(() => {
     if (start && isPencil) {
-      socket.emit('pencil', { isRound: isRound, roomId: roomId });
-
       interval.current = setInterval(() => {
         setTimer(prevTimer => {
           if (typeof prevTimer === 'number' && roomSetting) {
@@ -129,14 +127,10 @@ const Room: React.FC = () => {
             // 타이머 종료시 시간 리셋
             if (newTimer <= 0) {
               clearInterval(interval.current);
-              socket.emit('isRound', {
-                isRound: isRound,
-                roomId: Number(roomId),
-              });
-              setIsPencil(false);
+              socket.emit('pencil', { isRound: isRound + 1, roomId: roomId });
               return roomSetting?.time;
             }
-            socket?.emit('remainTimer', {
+            socket.emit('remainTimer', {
               remainTime: newTimer,
               roomId: Number(roomId),
             });
@@ -146,11 +140,51 @@ const Room: React.FC = () => {
         });
       }, 1000);
     }
+  }, [start, isPencil, roomSetting, isRound, roomId, socket, setTimer]);
 
+  useEffect(() => {
+    const handleNextRound = () => {
+      getUser();
+      if (isRound !== 1) {
+        socket.emit('isRound', {
+          isRound: isRound,
+          roomId: Number(roomId),
+        });
+      }
+    };
+
+    if (isRound !== 1) {
+      socket.on('pencilUpdate', handleNextRound);
+    }
+
+    return () => {
+      socket.off('pencilUpdate', handleNextRound);
+    };
+  }, [socket, getUser, isRound, roomId]);
+
+  useEffect(() => {
+    if (isRound === 1) {
+      getUser();
+
+      const handlePencilUpdate = () => {
+        getUser();
+      };
+
+      socket.on('pencilUpdate', handlePencilUpdate);
+
+      return () => {
+        socket.off('pencilUpdate', handlePencilUpdate);
+      };
+    }
+  }, [socket, getUser, isRound]);
+
+  // 타이머 실행
+  useEffect(() => {
+    countDown();
     return () => clearInterval(interval.current);
-  }, [socket, start, isRound, isPencil, roomSetting, roomId]);
+  }, [countDown]);
 
-  // 정답시 다음 라운드 진행
+  // 정답시 타이머 정지
   useEffect(() => {
     const handleMessage = () => {
       setIsAnswer(true);
