@@ -29,7 +29,7 @@ const Room: React.FC = () => {
   const [isAnswer, setIsAnswer] = useState(false);
   const [isPencil, setIsPencil] = useState(false);
   const [count, setCount] = useState(0);
-  const [isRound, setIsRound] = useState<number>(1);
+  const [isRound, setIsRound] = useState<number>(0);
 
   // 유저 목록 불러오기
   const getUser = useCallback(async () => {
@@ -44,10 +44,6 @@ const Room: React.FC = () => {
       console.error('Fetch error:', error);
     }
   }, [api, roomId]);
-
-  useEffect(() => {
-    getUser();
-  }, [getUser]);
 
   useEffect(() => {
     if (!nickName || !character) {
@@ -117,16 +113,15 @@ const Room: React.FC = () => {
     socket.emit('pencil', { isRound: isRound, roomId: roomId });
     socket.emit('gameStart');
     setStart(true);
-    getAnswer();
   };
 
   // 타이머 함수
   const interval = useRef<any>(null);
-  const countDown = useCallback(() => {
-    if (start && isPencil) {
+  const countDown = () => {
+    if (roomSetting) {
       interval.current = setInterval(() => {
         setTimer(prevTimer => {
-          if (typeof prevTimer === 'number' && roomSetting) {
+          if (typeof prevTimer === 'number') {
             const newTimer = prevTimer - 1;
             // 타이머 종료시 시간 리셋
             if (newTimer <= 0) {
@@ -144,36 +139,51 @@ const Room: React.FC = () => {
         });
       }, 1000);
     }
-  }, [start, isPencil, roomSetting, isRound, roomId, socket, setTimer]);
+  };
 
-  // pencilUpdate 유저데이터 업데이트
   useEffect(() => {
     if (socket) {
-      const handleNextRound = () => {
-        if (isRound > 1 && isPencil) {
-          socket.emit('isRound', {
-            isRound: isRound,
-            roomId: Number(roomId),
-          });
-        }
+      const handlePencilUpdate = async () => {
+        await getUser();
       };
 
-      socket.on('pencilUpdate', () => {
-        getUser();
-        handleNextRound();
-      });
+      socket.on('pencilUpdate', handlePencilUpdate);
 
       return () => {
-        socket.off('pencilUpdate');
+        socket.off('pencilUpdate', handlePencilUpdate);
       };
     }
-  }, [socket, getUser, isRound, roomId, isPencil]);
+  }, [socket, getUser, isRound, roomId, userInfo, nickName]);
+
+  // 연필 구별
+  useEffect(() => {
+    const pencilUser = userInfo.find(user => user.pencilAdmin === 1);
+    if (pencilUser?.username === nickName) {
+      setIsPencil(true);
+    } else {
+      setIsPencil(false);
+    }
+  }, [nickName, userInfo]);
+
+  const handleNextRound = () => {
+    console.log('handleNextRound called');
+    socket.emit('isRound', { isRound: isRound, roomId: Number(roomId) });
+  };
+
+  useEffect(() => {
+    if (isPencil) {
+      handleNextRound();
+    }
+  }, [isPencil]);
 
   // 타이머 실행
   useEffect(() => {
-    countDown();
-    return () => clearInterval(interval.current);
-  }, [countDown]);
+    if (start && isPencil) {
+      countDown();
+    } else {
+      clearInterval(interval.current); // isPencil이 false인 경우 타이머 중지
+    }
+  }, [isPencil, start]);
 
   // 정답시 타이머 정지
   useEffect(() => {
@@ -263,18 +273,8 @@ const Room: React.FC = () => {
   // 방장 구별
   useEffect(() => {
     const adminUser = userInfo.find(user => user.isAdmin === 1);
-    if (adminUser && adminUser.username === nickName) {
+    if (adminUser?.username === nickName) {
       setIsAdmin(true);
-    }
-  }, [nickName, userInfo]);
-
-  // 연필 구별
-  useEffect(() => {
-    const pencilUser = userInfo.find(user => user.pencilAdmin === 1);
-    if (pencilUser?.username === nickName) {
-      setIsPencil(true);
-    } else {
-      setIsPencil(false);
     }
   }, [nickName, userInfo]);
 
