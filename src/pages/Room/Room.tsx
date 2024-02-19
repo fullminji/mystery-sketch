@@ -26,7 +26,6 @@ const Room: React.FC = () => {
   const [roomSetting, setRoomSetting] = useState<settingProps>();
   const [isAdmin, setIsAdmin] = useState(false);
   const [gameEnd, setGameEnd] = useState(false);
-  const [isAnswer, setIsAnswer] = useState(false);
   const [isPencil, setIsPencil] = useState(false);
   const [count, setCount] = useState(0);
   const [isRound, setIsRound] = useState<number>(0);
@@ -110,8 +109,8 @@ const Room: React.FC = () => {
 
   // 게임 시작 (방장)
   const handleStart = () => {
-    socket.emit('pencil', { isRound: isRound, roomId: roomId });
     socket.emit('gameStart');
+    socket.emit('pencil', { isRound: isRound, roomId: roomId });
     setStart(true);
   };
 
@@ -127,6 +126,7 @@ const Room: React.FC = () => {
             if (newTimer <= 0) {
               clearInterval(interval.current);
               socket.emit('pencil', { isRound: isRound + 1, roomId: roomId });
+              console.log('타이머종료');
               return roomSetting?.time;
             }
             socket.emit('remainTimer', {
@@ -166,7 +166,7 @@ const Room: React.FC = () => {
   }, [nickName, userInfo]);
 
   const handleNextRound = () => {
-    console.log('handleNextRound called');
+    console.log('다음라운드시작');
     socket.emit('isRound', { isRound: isRound, roomId: Number(roomId) });
   };
 
@@ -178,35 +178,29 @@ const Room: React.FC = () => {
 
   // 타이머 실행
   useEffect(() => {
-    if (start && isPencil) {
+    if (isPencil) {
       countDown();
     } else {
       clearInterval(interval.current); // isPencil이 false인 경우 타이머 중지
     }
-  }, [isPencil, start]);
+  }, [isPencil]);
 
   // 정답시 타이머 정지
   useEffect(() => {
-    const handleMessage = () => {
-      setIsAnswer(true);
-    };
-
     if (socket) {
+      const handleMessage = () => {
+        if (isPencil) {
+          setTimer(0);
+        }
+      };
+
       socket.on('nextRound', handleMessage);
 
       return () => {
         socket.off('nextRound', handleMessage);
       };
     }
-  }, [socket, setIsAnswer]);
-
-  // 정답시 타이머 정지 (연필)
-  useEffect(() => {
-    if (isPencil && isAnswer) {
-      setTimer(0);
-      setIsAnswer(false);
-    }
-  }, [isPencil, isAnswer, setTimer, setIsAnswer]);
+  }, [socket, isPencil]);
 
   // 해당 라운드 정답 가져오기 (문제 맞추는 사람)
   useEffect(() => {
