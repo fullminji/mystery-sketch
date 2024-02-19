@@ -287,7 +287,6 @@ const Room: React.FC = () => {
         setGameEnd(true);
         setAnswer('');
       }
-      // console.log(isRound, roomSetting?.round);
     };
 
     gameEndCheck();
