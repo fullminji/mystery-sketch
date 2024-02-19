@@ -24,7 +24,7 @@ const Room: React.FC = () => {
   const nickName = sessionStorage.getItem('nickName');
   const character = sessionStorage.getItem('character');
   const [roomSetting, setRoomSetting] = useState<settingProps>();
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [gameEnd, setGameEnd] = useState(false);
   const [isAnswer, setIsAnswer] = useState(false);
   const [isPencil, setIsPencil] = useState(false);
