@@ -3,7 +3,7 @@ import Name from '../../components/Name';
 const Main = () => {
   return (
     <div>
-      <Name />
+      <Name type="main" />
     </div>
   );
 };

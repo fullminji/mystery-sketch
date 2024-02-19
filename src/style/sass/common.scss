@@ -5,6 +5,10 @@ html {
 body {
   font-size: 14px;
   font-family: sans-serif;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 html,
