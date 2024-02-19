@@ -29,6 +29,7 @@ const Room: React.FC = () => {
   const [isAnswer, setIsAnswer] = useState(false);
   const [isPencil, setIsPencil] = useState(false);
   const [count, setCount] = useState(0);
+  const [isRound, setIsRound] = useState<number>(1);
 
   // 유저 목록 불러오기
   const getUser = useCallback(async () => {
@@ -43,6 +44,10 @@ const Room: React.FC = () => {
       console.error('Fetch error:', error);
     }
   }, [api, roomId]);
+
+  useEffect(() => {
+    getUser();
+  }, [getUser]);
 
   useEffect(() => {
     if (!nickName || !character) {
@@ -104,7 +109,6 @@ const Room: React.FC = () => {
   }, [api, roomId, setAnswer, socket]);
 
   const [timer, setTimer] = useState(roomSetting?.time ?? 0);
-  const [isRound, setIsRound] = useState<number>(1);
 
   const [start, setStart] = useState(false);
 
@@ -142,41 +146,28 @@ const Room: React.FC = () => {
     }
   }, [start, isPencil, roomSetting, isRound, roomId, socket, setTimer]);
 
+  // pencilUpdate 유저데이터 업데이트
   useEffect(() => {
-    const handleNextRound = () => {
-      getUser();
-      if (isRound !== 1) {
-        socket.emit('isRound', {
-          isRound: isRound,
-          roomId: Number(roomId),
-        });
-      }
-    };
-
-    if (isRound !== 1) {
-      socket.on('pencilUpdate', handleNextRound);
-    }
-
-    return () => {
-      socket.off('pencilUpdate', handleNextRound);
-    };
-  }, [socket, getUser, isRound, roomId]);
-
-  useEffect(() => {
-    if (isRound === 1) {
-      getUser();
-
-      const handlePencilUpdate = () => {
-        getUser();
+    if (socket) {
+      const handleNextRound = () => {
+        if (isRound > 1 && isPencil) {
+          socket.emit('isRound', {
+            isRound: isRound,
+            roomId: Number(roomId),
+          });
+        }
       };
 
-      socket.on('pencilUpdate', handlePencilUpdate);
+      socket.on('pencilUpdate', () => {
+        getUser();
+        handleNextRound();
+      });
 
       return () => {
-        socket.off('pencilUpdate', handlePencilUpdate);
+        socket.off('pencilUpdate');
       };
     }
-  }, [socket, getUser, isRound]);
+  }, [socket, getUser, isRound, roomId, isPencil]);
 
   // 타이머 실행
   useEffect(() => {
