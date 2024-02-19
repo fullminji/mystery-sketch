@@ -120,9 +120,10 @@ const Canvas: React.FC<CanvasProps> = ({
     const canvas = canvasRef.current;
     if (canvas && ctx) {
       const colorToApply =
-        data.color !== selectedColor
-          ? data.color
-          : previousColors[previousColors.length - 1];
+        previousColors
+          .slice()
+          .reverse()
+          .find(color => color !== selectedColor) || selectedColor;
       ctx.strokeStyle = colorToApply;
       ctx.lineTo(data.x, data.y);
       ctx.stroke();
@@ -193,11 +194,13 @@ const Canvas: React.FC<CanvasProps> = ({
   const handleMouseDown = () => {
     if (!isPencil) return;
     setPainting(true);
+    socket.emit('mouseDown', { roomId });
   };
 
   const handleMouseUp = () => {
     if (!isPencil) return;
     setPainting(false);
+    socket.emit('mouseUp', { roomId });
     if (ctx) {
       ctx.closePath();
     }
