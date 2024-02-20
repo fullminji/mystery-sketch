@@ -36,15 +36,12 @@ const Chat: React.FC<UserProps> = ({
   useEffect(() => {
     if (socket) {
       socket.on('message', messageHandler);
-      socket.on('isRound', (data: any) => {
-        setIsRound(data);
-      });
 
       return () => {
         socket.off('message', messageHandler);
       };
     }
-  }, [socket, messageHandler, setIsRound]);
+  }, [socket, messageHandler]);
 
   const sendMessage = useCallback(() => {
     if (socket && message.trim() !== '') {

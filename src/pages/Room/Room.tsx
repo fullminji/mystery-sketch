@@ -24,11 +24,12 @@ const Room: React.FC = () => {
   const nickName = sessionStorage.getItem('nickName');
   const character = sessionStorage.getItem('character');
   const [roomSetting, setRoomSetting] = useState<settingProps>();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(true);
   const [gameEnd, setGameEnd] = useState(false);
   const [isPencil, setIsPencil] = useState(false);
   const [count, setCount] = useState(0);
   const [isRound, setIsRound] = useState<number>(0);
+  const [currentRound, setCurrentRound] = useState(1);
 
   // 유저 목록 불러오기
   const getUser = useCallback(async () => {
@@ -110,9 +111,27 @@ const Room: React.FC = () => {
   // 게임 시작 (방장)
   const handleStart = () => {
     socket.emit('gameStart');
-    socket.emit('pencil', { isRound: isRound, roomId: roomId });
+    socket.emit('pencil', { isRound: currentRound, roomId: roomId });
+    console.log('시작시 방장이보낸 pencil CurrentRound값 : ', currentRound);
     setStart(true);
   };
+
+  // pencil currentRound 업데이트
+  useEffect(() => {
+    if (socket) {
+      const handleCurrentRound = (data: number) => {
+        setCurrentRound(data);
+        console.log('pencil 소켓으로 받은데이터', data);
+      };
+      socket.on('pencil', (data: number) => {
+        handleCurrentRound(data);
+      });
+
+      return () => {
+        socket.off('pencil', handleCurrentRound);
+      };
+    }
+  }, [socket, currentRound]);
 
   // 타이머 함수
   const interval = useRef<any>(null);
@@ -124,9 +143,15 @@ const Room: React.FC = () => {
             const newTimer = prevTimer - 1;
             // 타이머 종료시 시간 리셋
             if (newTimer <= 0) {
+              console.log(
+                '타이머 종료시 pencil 보내기전 currentRound + 1 값 : ',
+                currentRound + 1,
+              );
+              socket.emit('pencil', {
+                isRound: currentRound + 1,
+                roomId: roomId,
+              });
               clearInterval(interval.current);
-              socket.emit('pencil', { isRound: isRound + 1, roomId: roomId });
-              console.log('타이머종료');
               return roomSetting?.time;
             }
             socket.emit('remainTimer', {
@@ -145,6 +170,10 @@ const Room: React.FC = () => {
     if (socket) {
       const handlePencilUpdate = async () => {
         await getUser();
+        console.log(
+          '연필유저리스트업데이트 될때 currentRound값 : ',
+          currentRound,
+        );
       };
 
       socket.on('pencilUpdate', handlePencilUpdate);
@@ -165,8 +194,25 @@ const Room: React.FC = () => {
     }
   }, [nickName, userInfo]);
 
+  useEffect(() => {
+    if (socket) {
+      const handleIsRound = (data: number) => {
+        setIsRound(data);
+        console.log('isRound 받음', data);
+      };
+      socket.on('isRound', (data: number) => {
+        handleIsRound(data);
+      });
+
+      return () => {
+        socket.off('isRound', handleIsRound);
+      };
+    }
+  }, [socket, setIsRound, isRound]);
+
+  // 다음 라운드 진행 (연필)
   const handleNextRound = () => {
-    console.log('다음라운드시작');
+    console.log('isRound emit보내기전 isRound값 : ', isRound);
     socket.emit('isRound', { isRound: isRound, roomId: Number(roomId) });
   };
 
@@ -182,6 +228,7 @@ const Room: React.FC = () => {
       countDown();
     } else {
       clearInterval(interval.current); // isPencil이 false인 경우 타이머 중지
+      console.log('타이머실행멈춤');
     }
   }, [isPencil]);
 
@@ -191,6 +238,7 @@ const Room: React.FC = () => {
       const handleMessage = () => {
         if (isPencil) {
           setTimer(0);
+          console.log('정답맞춰서 타이머0으로 만드는 함수 실행', isRound);
         }
       };
 
@@ -207,6 +255,7 @@ const Room: React.FC = () => {
     if (socket && !isPencil) {
       const handleAnswer = ({ answer }: { answer: string }) => {
         setAnswer(answer);
+        console.log('연필아닌사람은 정답 받아오는 함수');
       };
 
       socket.on('answer', handleAnswer);
@@ -215,13 +264,14 @@ const Room: React.FC = () => {
         socket.off('answer', handleAnswer);
       };
     }
-  }, [socket, isPencil, start]);
+  }, [socket, isPencil]);
 
   //다음 라운드 진행 (연필)
   useEffect(() => {
     if (socket && roomSetting && isPencil && !gameEnd) {
       const isRoundListener = () => {
         getAnswer();
+        console.log('다음라운드 정답가져옴');
       };
       socket.on('isRound', isRoundListener);
 
@@ -276,6 +326,7 @@ const Room: React.FC = () => {
   useEffect(() => {
     const gameEndCheck = () => {
       if (isRound === roomSetting?.round && timer === 0) {
+        console.log('게임끝');
         socket?.emit('gameEnd', { roomId: roomId });
         setStart(false);
         setGameEnd(true);
@@ -290,6 +341,7 @@ const Room: React.FC = () => {
   const handlePass = () => {
     if (isPencil) {
       setTimer(0);
+      console.log('기권할때 currentround값 : ', currentRound);
     }
   };
 
