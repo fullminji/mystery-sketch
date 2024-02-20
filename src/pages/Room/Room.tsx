@@ -241,13 +241,13 @@ const Room: React.FC = () => {
 
   // 타이머 실행
   useEffect(() => {
-    if (isPencil) {
+    if (isPencil && !gameEnd) {
       countDown();
     } else {
       clearInterval(interval.current); // isPencil이 false인 경우 타이머 중지
       console.log('타이머실행멈춤');
     }
-  }, [isPencil]);
+  }, [isPencil, gameEnd]);
 
   // 정답시 타이머 정지
   useEffect(() => {
