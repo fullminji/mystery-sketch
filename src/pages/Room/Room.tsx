@@ -24,7 +24,7 @@ const Room: React.FC = () => {
   const nickName = sessionStorage.getItem('nickName');
   const character = sessionStorage.getItem('character');
   const [roomSetting, setRoomSetting] = useState<settingProps>();
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [gameEnd, setGameEnd] = useState(false);
   const [isPencil, setIsPencil] = useState(false);
   const [count, setCount] = useState(0);
@@ -117,6 +117,23 @@ const Room: React.FC = () => {
   };
 
   // pencil currentRound 업데이트
+  useEffect(() => {
+    if (socket) {
+      const handleCurrentRound = (data: number) => {
+        setCurrentRound(data);
+        console.log('pencil 소켓으로 받은데이터', data);
+      };
+      socket.on('pencil', (data: number) => {
+        handleCurrentRound(data);
+      });
+
+      return () => {
+        socket.off('pencil', handleCurrentRound);
+      };
+    }
+  }, [socket, currentRound]);
+
+  // 게임시작 업데이트
   useEffect(() => {
     if (socket) {
       const handleCurrentRound = (data: number) => {
@@ -325,17 +342,30 @@ const Room: React.FC = () => {
   // 게임 종료 확인
   useEffect(() => {
     const gameEndCheck = () => {
-      if (isRound === roomSetting?.round && timer === 0) {
+      if (isPencil && isRound === roomSetting?.round && timer === 0) {
         console.log('게임끝');
         socket?.emit('gameEnd', { roomId: roomId });
-        setStart(false);
-        setGameEnd(true);
-        setAnswer('');
       }
     };
 
     gameEndCheck();
-  }, [socket, roomId, timer, isRound, roomSetting?.round, gameEnd]);
+  }, [socket, roomId, timer, isRound, roomSetting?.round, gameEnd, isPencil]);
+
+  useEffect(() => {
+    if (socket) {
+      const handleGameEnd = () => {
+        console.log('게임끝남');
+        setStart(false);
+        setGameEnd(true);
+        setAnswer('');
+      };
+      socket.on('gameEnd', handleGameEnd);
+
+      return () => {
+        socket.off('gameEnd', handleGameEnd);
+      };
+    }
+  });
 
   // 기권 (연필)
   const handlePass = () => {
