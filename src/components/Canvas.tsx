@@ -17,7 +17,6 @@ const Canvas: React.FC<CanvasProps> = ({
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [painting, setPainting] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string>('#000');
-  const [previousColors, setPreviousColors] = useState<string[]>([]);
 
   useEffect(() => {
     const pencilRadio = document.getElementById('draw1') as HTMLInputElement;
@@ -35,6 +34,8 @@ const Canvas: React.FC<CanvasProps> = ({
       canvas.height = canvas.offsetHeight;
     }
 
+    console.log('화면 돔');
+
     const context = canvas?.getContext('2d');
     if (context) {
       context.strokeStyle = selectedColor;
@@ -47,9 +48,21 @@ const Canvas: React.FC<CanvasProps> = ({
         drawOnCanvas(data);
       });
 
+      socket.on('mouseUp', () => {
+        if (ctx) {
+          ctx.closePath();
+          console.log('test closePath');
+        }
+      });
+
+      // socket.on('mouseDown', () => {
+      //   handleMouseDown();
+      //   console.log('test: mouse2');
+      // });
+
       socket.on('color', (data: any) => {
-        setPreviousColors(prevColors => [...prevColors, data.previousColor]);
         setSelectedColor(data.newColor);
+        console.log('실시간 소켓 컬러값: ', data.newColor);
       });
 
       socket.on('eraser', (data: any) => {
@@ -64,6 +77,7 @@ const Canvas: React.FC<CanvasProps> = ({
     return () => {
       if (socket) {
         socket.off('draw');
+        // socket.off('mouseUp');
         socket.off('color');
         socket.off('eraser');
         socket.off('clear');
@@ -75,6 +89,7 @@ const Canvas: React.FC<CanvasProps> = ({
   const handleColorChange = (color: string) => {
     setSelectedColor(color);
     socket.emit('color', { color });
+    console.log('컬러값: ', color);
   };
 
   // 그리기
@@ -98,6 +113,7 @@ const Canvas: React.FC<CanvasProps> = ({
           ctx.lineTo(mouseX, mouseY);
           ctx.stroke();
           socket.emit('draw', { x: mouseX, y: mouseY, color: selectedColor });
+          console.log('그리기');
         } else {
           ctx.beginPath();
           ctx.moveTo(mouseX, mouseY);
@@ -109,6 +125,7 @@ const Canvas: React.FC<CanvasProps> = ({
         ctx.lineTo(mouseX, mouseY);
         ctx.stroke();
         socket.emit('draw', { x: mouseX, y: mouseY, color: selectedColor });
+        console.log('펜 누르면 그리기');
       } else {
         setPainting(false);
       }
@@ -119,14 +136,10 @@ const Canvas: React.FC<CanvasProps> = ({
   const drawOnCanvas = (data: any) => {
     const canvas = canvasRef.current;
     if (canvas && ctx) {
-      const colorToApply =
-        previousColors
-          .slice()
-          .reverse()
-          .find(color => color !== selectedColor) || selectedColor;
-      ctx.strokeStyle = colorToApply;
+      ctx.strokeStyle = data.color;
       ctx.lineTo(data.x, data.y);
       ctx.stroke();
+      console.log('실시간 소켓 그리기: ', data.color);
     } else {
       ctx?.beginPath();
       ctx?.moveTo(data.x, data.y);
@@ -149,6 +162,8 @@ const Canvas: React.FC<CanvasProps> = ({
       context.lineWidth = 20;
 
       socket.emit('eraser', { x: mouseX, y: mouseY });
+
+      console.log('지우개');
     }
   };
 
@@ -164,6 +179,8 @@ const Canvas: React.FC<CanvasProps> = ({
       context.beginPath();
       context.arc(data.x, data.y, 10, 0, 2 * Math.PI);
       context.fill();
+
+      console.log('소켓 지우기');
     }
   };
 
@@ -176,6 +193,8 @@ const Canvas: React.FC<CanvasProps> = ({
       // socket.emit('clear');
     }
     setPainting(false);
+
+    console.log('전체 지우기');
   };
 
   // 라운드 바뀔 때마다 캔버스 초기화
@@ -187,31 +206,29 @@ const Canvas: React.FC<CanvasProps> = ({
   const handleMouseMove = (
     e: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
   ) => {
-    if (!isPencil) return;
+    // if (!isPencil) return;
     drawFn(e);
   };
 
   const handleMouseDown = () => {
-    if (!isPencil) return;
+    // if (!isPencil) return;
     setPainting(true);
     socket.emit('mouseDown', { roomId });
   };
 
   const handleMouseUp = () => {
-    if (!isPencil) return;
+    // if (!isPencil) return;
     setPainting(false);
     socket.emit('mouseUp', { roomId });
-    if (ctx) {
-      ctx.closePath();
-    }
   };
 
   const handleMouseLeave = () => {
-    if (!isPencil) return;
+    // if (!isPencil) return;
     setPainting(false);
-    if (ctx) {
-      ctx.closePath();
-    }
+    // if (ctx) {
+    //   ctx.closePath();
+    //   console.log('test closePath2');
+    // }
   };
 
   return (
@@ -223,7 +240,52 @@ const Canvas: React.FC<CanvasProps> = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       />
-      {isPencil ? (
+      <ul className="colorArea">
+        {COLOR_DATA.map(color => (
+          <li className="color" key={color.id}>
+            <input
+              type="radio"
+              id={`color${color.id}`}
+              name="colorGroup"
+              className="formRadio"
+              onChange={() => handleColorChange(color.color)}
+            />
+            <label htmlFor={`color${color.id}`} className="formLabel">
+              <span>{color.name}</span>
+            </label>
+          </li>
+        ))}
+        <li className="draw">
+          <input
+            type="radio"
+            id="draw1"
+            name="drawGroup"
+            className="formRadio"
+            onChange={drawFn}
+          />
+          <label htmlFor="draw1" className="formLabel">
+            <span>연필</span>
+          </label>
+        </li>
+        <li className="draw">
+          <input
+            type="radio"
+            id="draw2"
+            name="drawGroup"
+            className="formRadio"
+            onChange={eraserFn}
+          />
+          <label htmlFor="draw2" className="formLabel">
+            <span>지우개</span>
+          </label>
+        </li>
+        <li className="draw">
+          <button type="button" className="btn" onClick={clearCanvas}>
+            <span>전체 지우기</span>
+          </button>
+        </li>
+      </ul>
+      {/* {isPencil ? (
         <ul className="colorArea">
           {COLOR_DATA.map(color => (
             <li className="color" key={color.id}>
@@ -271,7 +333,7 @@ const Canvas: React.FC<CanvasProps> = ({
         </ul>
       ) : (
         <div className="colorArea" />
-      )}
+      )} */}
     </div>
   );
 };
