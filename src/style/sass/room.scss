@@ -24,7 +24,7 @@
         width: 60%;
       }
 
-      &:last-child {
+      &:nth-child(3) {
         align-items: flex-end;
         width: 22%;
       }
@@ -124,7 +124,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); 
+            transform: translate(-50%, -50%);
           }
         }
 

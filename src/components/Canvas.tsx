@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 
 interface CanvasProps {
   socket: any;
@@ -17,6 +17,20 @@ const Canvas: React.FC<CanvasProps> = ({
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [painting, setPainting] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string>('#000');
+
+  // 실시간 캔버스
+  const drawOnCanvas = (data: any) => {
+    const canvas = canvasRef.current;
+    if (canvas && ctx) {
+      ctx.strokeStyle = data.color;
+      ctx.lineTo(data.x, data.y);
+      ctx.stroke();
+      console.log('실시간 소켓 그리기: ', data.color);
+    } else {
+      ctx?.beginPath();
+      ctx?.moveTo(data.x, data.y);
+    }
+  };
 
   useEffect(() => {
     const pencilRadio = document.getElementById('draw1') as HTMLInputElement;
@@ -43,22 +57,24 @@ const Canvas: React.FC<CanvasProps> = ({
       setCtx(context);
     }
 
-    if (socket) {
+    if (socket && !isPencil) {
       socket.on('draw', (data: any) => {
         drawOnCanvas(data);
+        console.log(data);
       });
 
       socket.on('mouseUp', () => {
+        setPainting(false);
         if (ctx) {
           ctx.closePath();
           console.log('test closePath');
         }
       });
 
-      // socket.on('mouseDown', () => {
-      //   handleMouseDown();
-      //   console.log('test: mouse2');
-      // });
+      socket.on('mouseDown', () => {
+        setPainting(true);
+        console.log('test: mouse2');
+      });
 
       socket.on('color', (data: any) => {
         setSelectedColor(data.newColor);
@@ -77,13 +93,14 @@ const Canvas: React.FC<CanvasProps> = ({
     return () => {
       if (socket) {
         socket.off('draw');
-        // socket.off('mouseUp');
+        socket.off('mouseUp');
+        socket.off('mouseDown');
         socket.off('color');
         socket.off('eraser');
         socket.off('clear');
       }
     };
-  }, [socket, ctx]);
+  }, [socket, ctx, isPencil]);
 
   // 컬러 변경
   const handleColorChange = (color: string) => {
@@ -128,23 +145,12 @@ const Canvas: React.FC<CanvasProps> = ({
         console.log('펜 누르면 그리기');
       } else {
         setPainting(false);
+        ctx.closePath();
       }
     }
   };
 
-  // 실시간 캔버스
-  const drawOnCanvas = (data: any) => {
-    const canvas = canvasRef.current;
-    if (canvas && ctx) {
-      ctx.strokeStyle = data.color;
-      ctx.lineTo(data.x, data.y);
-      ctx.stroke();
-      console.log('실시간 소켓 그리기: ', data.color);
-    } else {
-      ctx?.beginPath();
-      ctx?.moveTo(data.x, data.y);
-    }
-  };
+  console.log(painting);
 
   // 지우개
   const eraserFn = (e: DrawEvent) => {
@@ -206,29 +212,30 @@ const Canvas: React.FC<CanvasProps> = ({
   const handleMouseMove = (
     e: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
   ) => {
-    // if (!isPencil) return;
-    drawFn(e);
+    if (isPencil) {
+      drawFn(e);
+    }
   };
 
   const handleMouseDown = () => {
-    // if (!isPencil) return;
+    if (!isPencil) return;
     setPainting(true);
     socket.emit('mouseDown', { roomId });
   };
 
   const handleMouseUp = () => {
-    // if (!isPencil) return;
+    if (!isPencil) return;
     setPainting(false);
     socket.emit('mouseUp', { roomId });
   };
 
   const handleMouseLeave = () => {
-    // if (!isPencil) return;
+    if (!isPencil) return;
     setPainting(false);
-    // if (ctx) {
-    //   ctx.closePath();
-    //   console.log('test closePath2');
-    // }
+    if (ctx) {
+      ctx.closePath();
+      console.log('test closePath2');
+    }
   };
 
   return (
@@ -240,52 +247,7 @@ const Canvas: React.FC<CanvasProps> = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       />
-      <ul className="colorArea">
-        {COLOR_DATA.map(color => (
-          <li className="color" key={color.id}>
-            <input
-              type="radio"
-              id={`color${color.id}`}
-              name="colorGroup"
-              className="formRadio"
-              onChange={() => handleColorChange(color.color)}
-            />
-            <label htmlFor={`color${color.id}`} className="formLabel">
-              <span>{color.name}</span>
-            </label>
-          </li>
-        ))}
-        <li className="draw">
-          <input
-            type="radio"
-            id="draw1"
-            name="drawGroup"
-            className="formRadio"
-            onChange={drawFn}
-          />
-          <label htmlFor="draw1" className="formLabel">
-            <span>연필</span>
-          </label>
-        </li>
-        <li className="draw">
-          <input
-            type="radio"
-            id="draw2"
-            name="drawGroup"
-            className="formRadio"
-            onChange={eraserFn}
-          />
-          <label htmlFor="draw2" className="formLabel">
-            <span>지우개</span>
-          </label>
-        </li>
-        <li className="draw">
-          <button type="button" className="btn" onClick={clearCanvas}>
-            <span>전체 지우기</span>
-          </button>
-        </li>
-      </ul>
-      {/* {isPencil ? (
+      {isPencil ? (
         <ul className="colorArea">
           {COLOR_DATA.map(color => (
             <li className="color" key={color.id}>
@@ -333,7 +295,7 @@ const Canvas: React.FC<CanvasProps> = ({
         </ul>
       ) : (
         <div className="colorArea" />
-      )} */}
+      )}
     </div>
   );
 };
